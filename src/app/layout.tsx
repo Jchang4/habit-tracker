@@ -7,6 +7,7 @@ import {
   MantineProvider,
   mantineHtmlProps,
 } from "@mantine/core";
+import { ReactQueryProvider } from "./lib/react-query-client";
 
 export const metadata = {
   title: "Amor Habits",
@@ -25,7 +26,9 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </MantineProvider>
       </body>
     </html>
   );

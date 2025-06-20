@@ -2,12 +2,20 @@
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 
+import { ReactQueryProvider } from "@/lib/react-query-client";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import {
   ColorSchemeScript,
   MantineProvider,
   mantineHtmlProps,
 } from "@mantine/core";
-import { ReactQueryProvider } from "./lib/react-query-client";
 
 export const metadata = {
   title: "Amor Habits",
@@ -26,9 +34,20 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
-        </MantineProvider>
+        <ClerkProvider>
+          <header className="flex justify-end items-center p-4 gap-4 h-16">
+            <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </header>
+          <MantineProvider>
+            <ReactQueryProvider>{children}</ReactQueryProvider>
+          </MantineProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

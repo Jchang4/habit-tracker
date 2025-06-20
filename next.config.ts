@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   // https://mantine.dev/guides/next/#app-router-tree-shaking
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks"],
+    serverComponentsExternalPackages: ["@prisma/client/edge"],
   },
 };
 

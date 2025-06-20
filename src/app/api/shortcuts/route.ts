@@ -1,6 +1,7 @@
+import { withApiAuth } from "@/lib/with-api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   return NextResponse.json({
     message: "hello world from post",
     timestamp: new Date().toISOString(),
@@ -8,3 +9,5 @@ export async function POST(request: NextRequest) {
     body: await request.json(),
   });
 }
+
+export const POST = withApiAuth(handler);

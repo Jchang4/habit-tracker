@@ -1,6 +1,13 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { validateApiKey } from "./lib/api-auth";
 
-export default clerkMiddleware();
+const isApiRoute = createRouteMatcher(["/api/(.*)"]);
+
+export default clerkMiddleware((auth, request) => {
+  if (isApiRoute(request)) {
+    return validateApiKey(request);
+  }
+});
 
 export const config = {
   matcher: [

@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------
+//  Models
+// -------------------------------------------
+
+// == Every habit the user wants to track ==
+model Habit {
+  id           String   @id @default(cuid())
+  userId       String // Clerk userId FK
+  name         String
+  description  String? // rich text-style optional
+  units        String? // "reps", "minutes", "ml", etc.
+  goodHabit    Boolean  @default(true) // true = build, false = reduce
+  targetPerDay Float? // e.g. 8 glasses
+  aiNotes      Json? // future AI embeddings / metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  logs    HabitLog[]
+
+  @@index([userId])
+}
+
+// == One row every time the habit is performed ==
+model HabitLog {
+  id          String   @id @default(cuid())
+  habitId     String
+  userId      String // redundant for simpler queries
+  performedAt DateTime @default(now())
+  amount      Float? // quantity (eg. 250 ml water)
+
+  // For grouping without heavy date_trunc().
+  // These should be populated in application code from `performedAt`.
+  day   DateTime @db.Date
+  week  Int
+  month Int
+  year  Int
+
+  Habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@index([habitId, performedAt])
+  @@index([userId, performedAt])
+  @@index([day])
+  @@index([week])
+  @@index([month])
+  @@index([year])
+}
+
+// == User-scoped API keys (hashed) ==
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  keyHash     String    @unique // store bcrypt/SHA-256 digest
+  name        String? // e.g. "Kitchen NFC"
+  description String?
+  revoked     Boolean   @default(false)
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}

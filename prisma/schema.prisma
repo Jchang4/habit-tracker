@@ -40,10 +40,10 @@ model HabitLog {
   habitId     String
   userId      String // redundant for simpler queries
   performedAt DateTime @default(now())
-  amount      Float? // quantity (eg. 250 ml water)
+  amount      Float? // quantity (eg. 250 ml water)
 
   // For grouping without heavy date_trunc().
-  // These should be populated in application code from `performedAt`.
+  // These are populated in application code from `performedAt`.
   day   DateTime @db.Date
   week  Int
   month Int

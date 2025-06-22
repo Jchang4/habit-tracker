@@ -34,20 +34,20 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <ClerkProvider>
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
-          <MantineProvider>
+        <MantineProvider>
+          <ClerkProvider>
+            <header className="flex justify-end items-center p-4 gap-4 h-16">
+              <SignedOut>
+                <SignInButton />
+                <SignUpButton />
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </header>
             <ReactQueryProvider>{children}</ReactQueryProvider>
-          </MantineProvider>
-        </ClerkProvider>
+          </ClerkProvider>
+        </MantineProvider>
       </body>
     </html>
   );

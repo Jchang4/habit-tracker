@@ -5,6 +5,7 @@ export interface ApiKey {
   id: string;
   name: string;
   description?: string;
+  keyPrefix: string;
   revoked: boolean;
   lastUsedAt?: string;
   createdAt: string;

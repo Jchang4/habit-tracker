@@ -64,6 +64,7 @@ model ApiKey {
   id          String    @id @default(cuid())
   userId      String
   keyHash     String    @unique // store bcrypt/SHA-256 digest
+  keyPrefix   String    // First 10 characters of the key (amor_ + first 5 hex chars)
   name        String? // e.g. "Kitchen NFC"
   description String?
   revoked     Boolean   @default(false)

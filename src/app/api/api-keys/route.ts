@@ -12,6 +12,7 @@ export const GET = withApiAuth(
         id: true,
         name: true,
         description: true,
+        keyPrefix: true,
         revoked: true,
         lastUsedAt: true,
         createdAt: true,
@@ -29,11 +30,13 @@ export const POST = withApiAuth(
 
     const newKey = `amor_${randomBytes(16).toString("hex")}`;
     const keyHash = createHash("sha256").update(newKey).digest("hex");
+    const keyPrefix = newKey.substring(0, 10); // "amor_" + first 5 hex chars
 
     await prisma.apiKey.create({
       data: {
         userId,
         keyHash,
+        keyPrefix,
         name,
         description,
       },

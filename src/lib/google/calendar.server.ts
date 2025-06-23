@@ -2,6 +2,7 @@ import "server-only";
 
 import { decrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
+import { Habit, HabitLog } from "@prisma/client";
 import { OAuth2Client } from "google-auth-library";
 import { calendar_v3, google } from "googleapis";
 
@@ -92,7 +93,12 @@ export async function createHabitLogEvent(
   amount: number,
   units: string,
   performedAt: Date
-): Promise<calendar_v3.Schema$Event> {
+): Promise<{
+  calendarEventId: string;
+  calendarId: string;
+  calendarEventLink: string;
+  calendarSyncedAt: Date;
+}> {
   const calendar = google.calendar("v3");
   const habitsCalendar = await createHabitsCalendar(oauth2Client);
   const res = await calendar.events.insert({
@@ -105,11 +111,20 @@ export async function createHabitLogEvent(
         dateTime: performedAt.toISOString(),
       },
       end: {
-        dateTime: performedAt.toISOString(),
+        dateTime: new Date(performedAt.getTime() + 15 * 60000).toISOString(), // Add 15 minutes
       },
     },
   });
-  return res.data;
+
+  const event = res.data;
+  const now = new Date();
+
+  return {
+    calendarEventId: event.id ?? "",
+    calendarId: habitsCalendar.id ?? "primary",
+    calendarEventLink: event.htmlLink ?? "",
+    calendarSyncedAt: now,
+  };
 }
 
 export async function checkGoogleConnection(userId: string): Promise<boolean> {
@@ -120,5 +135,88 @@ export async function checkGoogleConnection(userId: string): Promise<boolean> {
     return !!googleToken;
   } catch (error) {
     return false;
+  }
+}
+
+/**
+ * Syncs a habit log with Google Calendar
+ * If the log already has a calendar event, it will be updated
+ * Otherwise, a new calendar event will be created
+ */
+export async function syncHabitLogWithCalendar(
+  userId: string,
+  habitLog: HabitLog & { habit: Habit }
+): Promise<HabitLog> {
+  try {
+    // Check if user has Google connected
+    const isConnected = await checkGoogleConnection(userId);
+    if (!isConnected) {
+      return habitLog;
+    }
+
+    const oauth2Client = await getClientForUser(userId);
+
+    // If the log already has a calendar event, update it
+    if (habitLog.calendarEventId && habitLog.calendarId) {
+      const calendar = google.calendar("v3");
+      await calendar.events.update({
+        auth: oauth2Client,
+        calendarId: habitLog.calendarId,
+        eventId: habitLog.calendarEventId,
+        requestBody: {
+          summary: habitLog.habit.name,
+          description: `${habitLog.amount ?? habitLog.habit.defaultAmount} ${
+            habitLog.habit.units ?? "units"
+          }`,
+          start: {
+            dateTime: habitLog.performedAt.toISOString(),
+          },
+          end: {
+            dateTime: new Date(
+              habitLog.performedAt.getTime() + 15 * 60000
+            ).toISOString(),
+          },
+        },
+      });
+
+      // Update the sync timestamp
+      return prisma.habitLog.update({
+        where: { id: habitLog.id },
+        data: {
+          calendarSyncedAt: new Date(),
+        },
+        include: {
+          Habit: true,
+        },
+      });
+    }
+
+    // Otherwise, create a new calendar event
+    const eventDetails = await createHabitLogEvent(
+      oauth2Client,
+      habitLog.habit.name,
+      habitLog.amount ?? habitLog.habit.defaultAmount,
+      habitLog.habit.units ?? "units",
+      habitLog.performedAt
+    );
+
+    // Update the habit log with the calendar event details
+    const updatedLog = await prisma.habitLog.update({
+      where: { id: habitLog.id },
+      data: {
+        calendarEventId: eventDetails.calendarEventId,
+        calendarId: eventDetails.calendarId,
+        calendarEventLink: eventDetails.calendarEventLink,
+        calendarSyncedAt: eventDetails.calendarSyncedAt,
+      },
+      include: {
+        Habit: true,
+      },
+    });
+
+    return updatedLog;
+  } catch (error) {
+    console.error("Failed to sync habit log with calendar:", error);
+    return habitLog;
   }
 }

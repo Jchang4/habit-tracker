@@ -1,3 +1,4 @@
+import { syncHabitLogWithCalendar } from "@/lib/google/calendar.server";
 import { prisma } from "@/lib/prisma";
 import { extractDateFields } from "@/lib/utils";
 import { withApiAuth } from "@/lib/with-api-auth";
@@ -72,8 +73,23 @@ export const POST = withApiAuth(
         performedAt: logDate,
         ...dateFields,
       },
+      include: {
+        Habit: true,
+      },
     });
 
-    return NextResponse.json(newLog, { status: 201 });
+    try {
+      // Attempt to sync with Google Calendar, but don't block response
+      const updatedLog = await syncHabitLogWithCalendar(userId, {
+        ...newLog,
+        habit: newLog.Habit,
+      });
+
+      return NextResponse.json(updatedLog, { status: 201 });
+    } catch (error) {
+      console.error("Failed to sync with Google Calendar:", error);
+      // Return the original log if sync fails
+      return NextResponse.json(newLog, { status: 201 });
+    }
   }
 );

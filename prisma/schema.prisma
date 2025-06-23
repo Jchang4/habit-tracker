@@ -50,6 +50,12 @@ model HabitLog {
   month Int
   year  Int
 
+  // Calendar
+  calendarEventId    String?   // Google Calendar event ID
+  calendarId         String?   // Google Calendar ID where event was created
+  calendarEventLink  String?   // Direct link to the calendar event
+  calendarSyncedAt   DateTime? // When this log was last synced with calendar
+
   Habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
   @@index([habitId, performedAt])
@@ -58,6 +64,7 @@ model HabitLog {
   @@index([week])
   @@index([month])
   @@index([year])
+  @@index([calendarEventId])
 }
 
 // == User-scoped API keys (hashed) ==
@@ -73,4 +80,15 @@ model ApiKey {
   createdAt   DateTime  @default(now())
 
   @@index([userId])
+}
+
+model GoogleToken {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  accessToken String   // encrypted blob
+  refreshToken String  // encrypted blob
+  expiry      DateTime
+  scope       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

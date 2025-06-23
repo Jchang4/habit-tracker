@@ -70,7 +70,7 @@ export function DailyUsagePieChart({
         };
 
     // Generate colors for pie chart segments
-    const colors = ["blue.6", "gray.6"];
+    const colors = [habit?.goodHabit ? "blue.6" : "red.5", "gray.6"];
     const chartData = [
       {
         name: todayData.isToday

@@ -106,7 +106,7 @@ export function DailyUsageBarChart({ habitId }: DailyUsageBarChartProps) {
         series={[
           {
             name: "amount",
-            color: habit.goodHabit ? "teal.6" : "red.6",
+            color: habit.goodHabit ? "blue.6" : "red.5",
           },
         ]}
         withBarValueLabel

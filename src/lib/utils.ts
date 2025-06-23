@@ -24,3 +24,22 @@ export function extractDateFields(date: Date) {
     year: date.getFullYear(),
   };
 }
+
+/**
+ * Sort an array of objects by their createdAt field. Used in the Array.sort
+ * method.
+ *
+ * @param a - The first object to compare.
+ * @param b - The second object to compare.
+ * @returns A negative value if a is before b, a positive value if a is after b,
+ * or 0 if they are the same.
+ *
+ * @example
+ * const sorted = array.sort(sortByCreatedAt);
+ */
+export function sortByCreatedAt<T extends { createdAt: string }>(
+  a: T,
+  b: T
+): number {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}

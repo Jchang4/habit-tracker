@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiKey, useApiKeys, useRevokeApiKey } from "@/lib/api/api-keys";
+import { sortByCreatedAt } from "@/lib/utils";
 import {
   ActionIcon,
   Alert,
@@ -86,7 +87,7 @@ export function ApiKeyList() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {apiKeys.map((key) => (
+              {apiKeys.sort(sortByCreatedAt).map((key) => (
                 <Table.Tr key={key.id}>
                   <Table.Td>
                     <Stack gap={0}>

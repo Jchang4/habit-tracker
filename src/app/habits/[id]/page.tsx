@@ -3,6 +3,7 @@
 import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
 import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
 import { GoodHabitBadge } from "@/components/habits/GoodHabitBadge";
+import { HabitDetailsCard } from "@/components/habits/HabitDetailsCard";
 import { DailyUsagePieChart } from "@/components/habits/charts/DailyUsagePieChart";
 import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
 import { DeleteHabitModal } from "@/components/habits/modals/DeleteHabitModal";
@@ -93,48 +94,25 @@ export default function HabitPage({ params }: HabitPageProps) {
       {/* Main Content Grid */}
       <Grid>
         {/* Left Column - Habit Details & Quick Log */}
-        <Grid.Col span={{ base: 12, md: 8 }}>
-          <Stack gap="md">
-            {/* Habit Details Card */}
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Group justify="space-between" mb="md">
-                <Text fw={500} size="lg">
-                  Habit Details
-                </Text>
-              </Group>
-
-              <Stack gap="sm">
-                <Group>
-                  <Text fw={500}>Units:</Text>
-                  <Text>{habit.units}</Text>
-                </Group>
-
-                <Group>
-                  <Text fw={500}>Default Amount:</Text>
-                  <Text>{habit.defaultAmount}</Text>
-                </Group>
-
-                {habit.targetPerDay && (
-                  <Group>
-                    <Text fw={500}>Daily Target:</Text>
-                    <Text>
-                      {habit.targetPerDay} {habit.units}
-                    </Text>
-                  </Group>
-                )}
-              </Stack>
-            </Card>
-
-            {/* Quick Log Input */}
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Text fw={500} size="lg" mb="md">
-                Quick Log
-              </Text>
-              <HabitQuickLogInput habit={habit} />
-            </Card>
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+          <Stack gap="md" h="100%">
+            {/* Nested Grid for Details and Quick Log side by side */}
+            <Grid gutter="md">
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <HabitDetailsCard habit={habit} />
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+                  <Text fw={500} size="lg" mb="md">
+                    Quick Log
+                  </Text>
+                  <HabitQuickLogInput habit={habit} />
+                </Card>
+              </Grid.Col>
+            </Grid>
 
             {/* Usage Per Day Chart Placeholder */}
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
+            <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
               <Group mb="md">
                 <IconChartBar size="1.5rem" />
                 <Text fw={500} size="lg">
@@ -144,6 +122,7 @@ export default function HabitPage({ params }: HabitPageProps) {
               <Paper
                 p="xl"
                 bg="gray.0"
+                h="100%"
                 style={{
                   minHeight: 300,
                   display: "flex",
@@ -161,38 +140,9 @@ export default function HabitPage({ params }: HabitPageProps) {
         </Grid.Col>
 
         {/* Right Column - Charts */}
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <Stack gap="md">
-            {/* Remaining Usage Today Chart Placeholder */}
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Group mb="md">
-                <IconChartPie size="1.5rem" />
-                <Text fw={500} size="lg">
-                  Today's Progress
-                </Text>
-              </Group>
-              <Paper
-                p="xl"
-                bg="gray.0"
-                style={{
-                  minHeight: 250,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px dashed #dee2e6",
-                }}
-              >
-                <DailyUsagePieChart habitId={habit.id} />
-              </Paper>
-            </Card>
-
-            {/* API Access */}
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Text fw={500} size="lg" mb="md">
-                API Access
-              </Text>
-              <CopyHabitApiUrl habit={habit} />
-            </Card>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Stack gap="md" h="100%">
+            <TodaysProgressCard habitId={habit.id} />
           </Stack>
         </Grid.Col>
       </Grid>
@@ -205,9 +155,44 @@ export default function HabitPage({ params }: HabitPageProps) {
         <HabitLogsTable habitId={habit.id} />
       </Card>
 
+      {/* API Access */}
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Text fw={500} size="lg" mb="md">
+          API Access
+        </Text>
+        <CopyHabitApiUrl habit={habit} />
+      </Card>
+
       <Group justify="flex-end">
         <DeleteHabitModal habit={habit} />
       </Group>
     </Stack>
   );
 }
+
+const TodaysProgressCard = ({ habitId }: { habitId: string }) => {
+  return (
+    <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+      <Group mb="md">
+        <IconChartPie size="1.5rem" />
+        <Text fw={500} size="lg">
+          Today's Progress
+        </Text>
+      </Group>
+      <Paper
+        p="xl"
+        bg="gray.0"
+        h="100%"
+        style={{
+          minHeight: 250,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "2px dashed #dee2e6",
+        }}
+      >
+        <DailyUsagePieChart habitId={habitId} />
+      </Paper>
+    </Card>
+  );
+};

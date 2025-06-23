@@ -25,6 +25,7 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
     name: "",
     description: "",
     units: "",
+    defaultAmount: 1,
     goodHabit: true,
     targetPerDay: 1,
   });
@@ -36,9 +37,10 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNumberChange = (value: number | string) => {
-    setFormData((prev) => ({ ...prev, targetPerDay: Number(value) || 0 }));
-  };
+  const handleNumberChange =
+    (field: "targetPerDay" | "defaultAmount") => (value: number | string) => {
+      setFormData((prev) => ({ ...prev, [field]: Number(value) || 0 }));
+    };
 
   const handleSwitchChange = (checked: boolean) => {
     setFormData((prev) => ({ ...prev, goodHabit: checked }));
@@ -53,6 +55,7 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
           name: "",
           description: "",
           units: "",
+          defaultAmount: 1,
           goodHabit: true,
           targetPerDay: 1,
         });
@@ -99,13 +102,22 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
 
           <NumberInput
             required
-            label="Daily Target"
-            value={formData.targetPerDay}
-            onChange={handleNumberChange}
+            label="Default Amount"
+            value={formData.defaultAmount}
+            onChange={handleNumberChange("defaultAmount")}
             min={0}
-            placeholder="Daily goal"
+            placeholder="Default amount per log"
           />
         </Group>
+
+        <NumberInput
+          required
+          label="Daily Target"
+          value={formData.targetPerDay}
+          onChange={handleNumberChange("targetPerDay")}
+          min={0}
+          placeholder="Daily goal"
+        />
 
         <Switch
           label="This is a good habit I want to build"

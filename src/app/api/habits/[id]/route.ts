@@ -32,7 +32,8 @@ export const PUT = withApiAuth(
   ) => {
     const { id } = await params;
     const body = await req.json();
-    const { name, description, units, goodHabit, targetPerDay } = body;
+    const { name, description, units, defaultAmount, goodHabit, targetPerDay } =
+      body;
 
     const habit = await prisma.habit.findFirst({
       where: { id, userId },
@@ -48,6 +49,7 @@ export const PUT = withApiAuth(
         name,
         description,
         units,
+        defaultAmount,
         goodHabit,
         targetPerDay,
       },

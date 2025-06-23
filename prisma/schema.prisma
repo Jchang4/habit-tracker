@@ -22,6 +22,7 @@ model Habit {
   name         String
   description  String? // rich text-style optional
   units        String? // "reps", "minutes", "ml", etc.
+  defaultAmount Float   @default(1) // Default amount when none is provided
   goodHabit    Boolean  @default(true) // true = build, false = reduce
   targetPerDay Float? // e.g. 8 glasses
   aiNotes      Json? // future AI embeddings / metadata

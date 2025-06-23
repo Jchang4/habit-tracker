@@ -19,7 +19,7 @@ interface HabitQuickLogInputProps {
 }
 
 export function HabitQuickLogInput({ habit }: HabitQuickLogInputProps) {
-  const [amount, setAmount] = useState<number | string>(habit.targetPerDay);
+  const [amount, setAmount] = useState<number | string>(habit.defaultAmount);
   const { mutate: createLog, isPending } = useCreateHabitLog();
 
   const handleQuickLog = () => {

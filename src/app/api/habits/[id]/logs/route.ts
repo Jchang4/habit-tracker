@@ -52,7 +52,11 @@ export const POST = withApiAuth(
     }
 
     const body = await req.json();
-    const { amount, performedAt } = body;
+    const { amount: requestAmount, performedAt } = body;
+
+    // Use defaultAmount from habit if no amount is provided
+    const amount =
+      requestAmount !== undefined ? requestAmount : habit.defaultAmount;
 
     // Parse the performedAt date or use current time
     const logDate = performedAt ? new Date(performedAt) : new Date();

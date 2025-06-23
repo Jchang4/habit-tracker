@@ -16,7 +16,7 @@ export interface HabitLog {
 }
 
 export interface CreateHabitLogData {
-  amount: number;
+  amount?: number;
   performedAt: string;
 }
 

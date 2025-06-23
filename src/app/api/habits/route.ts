@@ -14,7 +14,8 @@ export const GET = withApiAuth(
 export const POST = withApiAuth(
   async (req: NextRequest, { userId }: { userId: string }) => {
     const body = await req.json();
-    const { name, description, units, goodHabit, targetPerDay } = body;
+    const { name, description, units, defaultAmount, goodHabit, targetPerDay } =
+      body;
 
     const newHabit = await prisma.habit.create({
       data: {
@@ -22,6 +23,7 @@ export const POST = withApiAuth(
         name,
         description,
         units,
+        defaultAmount,
         goodHabit,
         targetPerDay,
       },

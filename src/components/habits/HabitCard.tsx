@@ -1,6 +1,7 @@
 "use client";
 
 import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
+import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
 import { HabitQuickLogInput } from "@/components/habits/HabitQuickLogInput";
 import { Habit } from "@/lib/api/habits";
 import {
@@ -69,6 +70,8 @@ export function HabitCard({ habit }: HabitCardProps) {
         <Collapse in={showLogs}>
           <Divider my="md" />
           <HabitLogsTable habitId={habit.id} />
+          <Divider my="md" />
+          <CopyHabitApiUrl habit={habit} />
         </Collapse>
       </Card>
     </Box>

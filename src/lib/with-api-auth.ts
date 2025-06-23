@@ -12,7 +12,7 @@ type AuthenticatedApiHandler<T> = (
 async function getUserIdFromApiKey(
   request: NextRequest
 ): Promise<string | undefined> {
-  const apiKeyHeader = request.headers.get("x-api-key");
+  const apiKeyHeader = request.headers.get("x-amor-api-key");
   if (!apiKeyHeader) {
     return;
   }

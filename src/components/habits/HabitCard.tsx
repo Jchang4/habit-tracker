@@ -2,6 +2,7 @@
 
 import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
 import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
+import { DailyUsageSparkline } from "@/components/habits/charts/DailyUsageSparkline";
 import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
 import { Habit } from "@/lib/api/habits";
 import {
@@ -48,6 +49,11 @@ export function HabitCard({ habit }: HabitCardProps) {
             {habit.description}
           </Text>
         )}
+
+        {/* Trend Sparkline */}
+        <Box my="md" w="100%">
+          <DailyUsageSparkline habitId={habit.id} days={7} />
+        </Box>
 
         <Divider my="sm" />
 

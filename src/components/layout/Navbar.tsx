@@ -1,7 +1,8 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Button, Flex, Title } from "@mantine/core";
+import { Flex, Title } from "@mantine/core";
 import Link from "next/link";
 import { SignInButton, SignUpButton } from "./AuthButtons";
+import NavLinks from "./NavLinks";
 
 const ROUTES = [
   {
@@ -30,9 +31,11 @@ export default function Navbar() {
 
 const Logo = () => {
   return (
-    <Title order={1} size="md">
-      Amor Habits
-    </Title>
+    <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+      <Title order={1} size="md">
+        Amor Habits
+      </Title>
+    </Link>
   );
 };
 
@@ -47,23 +50,5 @@ const UserProfile = () => {
         <UserButton />
       </SignedIn>
     </>
-  );
-};
-
-const NavLinks = () => {
-  return (
-    <Flex gap="md">
-      {ROUTES.map((route) => (
-        <Button
-          key={route.href}
-          component={Link}
-          href={route.href}
-          variant="subtle"
-          size="sm"
-        >
-          {route.label}
-        </Button>
-      ))}
-    </Flex>
   );
 };

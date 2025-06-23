@@ -47,10 +47,6 @@ export function CreateApiKeyForm({ onSuccess }: CreateApiKeyFormProps) {
           name: "",
           description: "",
         });
-
-        if (onSuccess) {
-          onSuccess();
-        }
       },
     });
   };
@@ -91,9 +87,19 @@ export function CreateApiKeyForm({ onSuccess }: CreateApiKeyFormProps) {
           </Group>
         </Alert>
 
-        <Button onClick={() => setNewApiKey(null)} mt="md">
-          Create Another Key
-        </Button>
+        <Group justify="flex-end">
+          <Button
+            onClick={() => {
+              setNewApiKey(null);
+              if (onSuccess) {
+                onSuccess();
+              }
+            }}
+            mt="md"
+          >
+            Close
+          </Button>
+        </Group>
       </Paper>
     );
   }

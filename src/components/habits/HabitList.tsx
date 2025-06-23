@@ -1,7 +1,7 @@
 "use client";
 
 import { useHabits } from "@/lib/api/habits";
-import { Skeleton, Stack, Text, Title } from "@mantine/core";
+import { Skeleton, Stack, Text } from "@mantine/core";
 import { HabitCard } from "./HabitCard";
 
 export function HabitList() {
@@ -10,10 +10,9 @@ export function HabitList() {
   if (isLoading) {
     return (
       <Stack>
-        <Title order={2}>Your Habits</Title>
-        <Skeleton height={120} radius="md" mb="sm" />
-        <Skeleton height={120} radius="md" mb="sm" />
-        <Skeleton height={120} radius="md" />
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} height={240} radius="md" mb="sm" />
+        ))}
       </Stack>
     );
   }

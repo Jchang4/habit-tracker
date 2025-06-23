@@ -67,6 +67,29 @@ export async function getCalendars(
   return res.data.items ?? [];
 }
 
+export async function deleteCalendarEvent(
+  userId: string,
+  log: HabitLog & { calendarId: string; calendarEventId: string }
+): Promise<boolean> {
+  if (!log.calendarId || !log.calendarEventId) {
+    return true;
+  }
+
+  try {
+    const oauth2Client = await getClientForUser(userId);
+    const calendar = google.calendar("v3");
+    const res = await calendar.events.delete({
+      auth: oauth2Client,
+      calendarId: log.calendarId,
+      eventId: log.calendarEventId,
+    });
+    return res.status === 204;
+  } catch (error) {
+    console.error("Failed to delete calendar event:", error);
+    return false;
+  }
+}
+
 export async function createHabitsCalendar(
   oauth2Client: OAuth2Client
 ): Promise<calendar_v3.Schema$CalendarListEntry> {

@@ -1,11 +1,10 @@
 import {
-  getClientForUser,
+  deleteCalendarEvent,
   syncHabitLogWithCalendar,
 } from "@/lib/google/calendar.server";
 import { prisma } from "@/lib/prisma";
 import { extractDateFields } from "@/lib/utils";
 import { withApiAuth } from "@/lib/with-api-auth";
-import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
@@ -105,18 +104,11 @@ export const DELETE = withApiAuth(
 
     // If the log has a calendar event, delete it
     if (log.calendarEventId && log.calendarId) {
-      try {
-        const oauth2Client = await getClientForUser(userId);
-        const calendar = google.calendar("v3");
-        await calendar.events.delete({
-          auth: oauth2Client,
-          calendarId: log.calendarId,
-          eventId: log.calendarEventId,
-        });
-      } catch (error) {
-        console.error("Failed to delete calendar event:", error);
-        // Continue with deletion even if calendar event deletion fails
-      }
+      await deleteCalendarEvent(userId, {
+        ...log,
+        calendarId: log.calendarId ?? "",
+        calendarEventId: log.calendarEventId ?? "",
+      });
     }
 
     await prisma.habitLog.delete({

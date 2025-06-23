@@ -4,6 +4,7 @@ import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
 import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
 import { GoodHabitBadge } from "@/components/habits/GoodHabitBadge";
 import { HabitDetailsCard } from "@/components/habits/HabitDetailsCard";
+import { DailyUsageBarChart } from "@/components/habits/charts/DailyUsageBarChart";
 import { DailyUsagePieChart } from "@/components/habits/charts/DailyUsagePieChart";
 import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
 import { DeleteHabitModal } from "@/components/habits/modals/DeleteHabitModal";
@@ -111,7 +112,7 @@ export default function HabitPage({ params }: HabitPageProps) {
               </Grid.Col>
             </Grid>
 
-            {/* Usage Per Day Chart Placeholder */}
+            {/* Usage Per Day Chart */}
             <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
               <Group mb="md">
                 <IconChartBar size="1.5rem" />
@@ -119,22 +120,7 @@ export default function HabitPage({ params }: HabitPageProps) {
                   Usage Per Day
                 </Text>
               </Group>
-              <Paper
-                p="xl"
-                bg="gray.0"
-                h="100%"
-                style={{
-                  minHeight: 300,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px dashed #dee2e6",
-                }}
-              >
-                <Text c="dimmed" ta="center">
-                  Bar chart showing daily usage will be displayed here
-                </Text>
-              </Paper>
+              <DailyUsageBarChart habitId={habit.id} />
             </Card>
           </Stack>
         </Grid.Col>

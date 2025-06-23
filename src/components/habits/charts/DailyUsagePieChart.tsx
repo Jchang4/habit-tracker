@@ -133,8 +133,6 @@ export function DailyUsagePieChart({
     );
   }
 
-  console.log(chartData);
-
   return (
     <Stack gap="md" align="center">
       <Title order={4}>{title}</Title>

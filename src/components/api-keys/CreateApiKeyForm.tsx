@@ -19,7 +19,11 @@ import {
 import { IconCheck, IconCopy, IconKey } from "@tabler/icons-react";
 import { useState } from "react";
 
-export function CreateApiKeyForm() {
+interface CreateApiKeyFormProps {
+  onSuccess?: () => void;
+}
+
+export function CreateApiKeyForm({ onSuccess }: CreateApiKeyFormProps) {
   const { mutate: createApiKey, isPending } = useCreateApiKey();
   const [formData, setFormData] = useState<CreateApiKeyData>({
     name: "",
@@ -43,6 +47,10 @@ export function CreateApiKeyForm() {
           name: "",
           description: "",
         });
+
+        if (onSuccess) {
+          onSuccess();
+        }
       },
     });
   };

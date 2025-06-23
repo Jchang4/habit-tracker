@@ -18,10 +18,10 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { IconAlertCircle, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
-import { CreateApiKeyForm } from "./CreateApiKeyForm";
+import { CreateApiKeyModal } from "./CreateApiKeyModal";
 
 export function ApiKeyList() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -65,12 +65,7 @@ export function ApiKeyList() {
     <Stack gap="md">
       <Group justify="space-between">
         <Title order={2}>API Keys</Title>
-        <Button
-          leftSection={<IconPlus size="1rem" />}
-          onClick={() => setShowCreateForm(true)}
-        >
-          Create API Key
-        </Button>
+        <CreateApiKeyModal />
       </Group>
 
       {apiKeys && apiKeys.length > 0 ? (
@@ -163,17 +158,6 @@ export function ApiKeyList() {
           No API keys found. Create your first API key to get started.
         </Text>
       )}
-
-      {/* Create API Key Modal */}
-      <Modal
-        opened={showCreateForm}
-        onClose={() => setShowCreateForm(false)}
-        title="Create API Key"
-        centered
-        size="md"
-      >
-        <CreateApiKeyForm />
-      </Modal>
 
       {/* Revoke Confirmation Modal */}
       <Modal

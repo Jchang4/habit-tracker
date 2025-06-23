@@ -2,15 +2,9 @@
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 
+import Navbar from "@/components/layout/Navbar";
 import { ReactQueryProvider } from "@/lib/react-query-client";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import {
   ColorSchemeScript,
   MantineProvider,
@@ -36,15 +30,7 @@ export default function RootLayout({
       <body>
         <MantineProvider>
           <ClerkProvider>
-            <header className="flex justify-end items-center p-4 gap-4 h-16">
-              <SignedOut>
-                <SignInButton />
-                <SignUpButton />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </header>
+            <Navbar />
             <ReactQueryProvider>{children}</ReactQueryProvider>
           </ClerkProvider>
         </MantineProvider>

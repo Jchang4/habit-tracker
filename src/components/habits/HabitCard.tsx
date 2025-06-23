@@ -12,8 +12,10 @@ import {
   Divider,
   Group,
   Text,
+  Title,
 } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import Link from "next/link";
 import { useState } from "react";
 import { GoodHabitBadge } from "./GoodHabitBadge";
 
@@ -28,7 +30,12 @@ export function HabitCard({ habit }: HabitCardProps) {
     <Box style={{ width: "100%" }}>
       <Card shadow="sm" padding="md" radius="md" withBorder>
         <Group justify="space-between" mb="xs">
-          <Text fw={500}>{habit.name}</Text>
+          <Link
+            href={`/habits/${habit.id}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <Title order={4}>{habit.name}</Title>
+          </Link>
           {habit.targetPerDay && (
             <Text size="sm" c="dimmed">
               Target: {habit.targetPerDay} {habit.units}

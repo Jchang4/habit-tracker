@@ -1,6 +1,8 @@
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
+// @ts-ignore
+import "@mantine/charts/styles.css";
 
 import Navbar from "@/components/layout/Navbar";
 import { ReactQueryProvider } from "@/lib/react-query-client";

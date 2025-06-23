@@ -2,7 +2,7 @@
 
 import { Button, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { CreateHabitForm } from "./CreateHabitForm";
+import { CreateHabitForm } from "./forms/CreateHabitForm";
 
 export function CreateHabitModal() {
   const [opened, { open, close }] = useDisclosure(false);

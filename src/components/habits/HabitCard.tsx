@@ -2,7 +2,7 @@
 
 import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
 import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
-import { HabitQuickLogInput } from "@/components/habits/HabitQuickLogInput";
+import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
 import { Habit } from "@/lib/api/habits";
 import {
   Box,

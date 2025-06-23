@@ -14,7 +14,11 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 
-export function CreateHabitForm() {
+interface CreateHabitFormProps {
+  onSuccess?: () => void;
+}
+
+export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
   const { mutate: createHabit, isPending } = useCreateHabit();
 
   const [formData, setFormData] = useState<CreateHabitData>({
@@ -52,6 +56,11 @@ export function CreateHabitForm() {
           goodHabit: true,
           targetPerDay: 1,
         });
+
+        // Call the onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess();
+        }
       },
     });
   };

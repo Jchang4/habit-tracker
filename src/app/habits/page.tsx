@@ -1,18 +1,19 @@
-import { CreateHabitForm } from "@/components/habits/CreateHabitForm";
+import { CreateHabitModal } from "@/components/habits/CreateHabitModal";
 import { HabitList } from "@/components/habits/HabitList";
-import { Center, Container, Divider, Stack, Title } from "@mantine/core";
+import { Container, Group, Stack, Title } from "@mantine/core";
 
 export default function HabitsPage() {
   return (
     <Stack gap="md" p="md" pb="8rem">
-      <Center>
-        <Title>Your Habits</Title>
-      </Center>
+      <Container size="md" px="md" w="100%" mb="md">
+        <Group justify="space-between" align="center">
+          <Title>Your Habits</Title>
+          <CreateHabitModal />
+        </Group>
+      </Container>
       <Container size="md" px="md" w="100%">
         <Stack gap="md">
           <HabitList />
-          <Divider my="md" />
-          <CreateHabitForm />
         </Stack>
       </Container>
     </Stack>

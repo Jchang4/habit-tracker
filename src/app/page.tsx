@@ -1,20 +1,17 @@
-import { CreateHabitForm } from "@/components/habits/CreateHabitForm";
-import { HabitList } from "@/components/habits/HabitList";
-import { Center, Container, Divider, Stack, Title } from "@mantine/core";
+import { Button, Center, Stack } from "@mantine/core";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <Stack gap="md" p="md" pb="8rem">
       <Center>
-        <Title>Your Habits</Title>
+        <Button component={Link} href="/habits" variant="light">
+          Habits
+        </Button>
+        <Button component={Link} href="/api-keys" variant="light">
+          API Keys
+        </Button>
       </Center>
-      <Container size="md" px="md" w="100%">
-        <Stack gap="md">
-          <HabitList />
-          <Divider my="md" />
-          <CreateHabitForm />
-        </Stack>
-      </Container>
     </Stack>
   );
 }

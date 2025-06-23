@@ -1,25 +1,20 @@
 "use client";
 
 import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
-import { useCreateHabitLog } from "@/lib/api/habit-logs";
+import { HabitQuickLogInput } from "@/components/habits/HabitQuickLogInput";
 import { Habit } from "@/lib/api/habits";
 import {
-  ActionIcon,
-  Badge,
   Box,
   Button,
   Card,
   Collapse,
   Divider,
-  Flex,
   Group,
-  NumberInput,
   Text,
-  Tooltip,
 } from "@mantine/core";
-import { IconCheck, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
-import { format } from "date-fns";
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { useState } from "react";
+import { GoodHabitBadge } from "./GoodHabitBadge";
 
 interface HabitCardProps {
   habit: Habit;
@@ -27,20 +22,6 @@ interface HabitCardProps {
 
 export function HabitCard({ habit }: HabitCardProps) {
   const [showLogs, setShowLogs] = useState(false);
-  const [amount, setAmount] = useState<number | string>(habit.targetPerDay);
-  const { mutate: createLog, isPending } = useCreateHabitLog();
-
-  const handleQuickLog = () => {
-    if (!amount) return;
-
-    createLog({
-      habitId: habit.id,
-      data: {
-        amount: Number(amount),
-        performedAt: new Date().toISOString(),
-      },
-    });
-  };
 
   return (
     <Box style={{ width: "100%" }}>
@@ -62,37 +43,12 @@ export function HabitCard({ habit }: HabitCardProps) {
 
         <Divider my="sm" />
 
-        <Group justify="space-between" mb="xs">
-          <Text size="sm">Quick Log for {format(new Date(), "MMM d")}</Text>
-          <Flex gap="xs" align="center">
-            <NumberInput
-              size="xs"
-              value={amount}
-              onChange={setAmount}
-              min={0}
-              style={{ width: "80px" }}
-              placeholder={habit.units}
-            />
-            <Tooltip label="Log now">
-              <ActionIcon
-                color="blue"
-                variant="filled"
-                size="sm"
-                onClick={handleQuickLog}
-                loading={isPending}
-              >
-                <IconCheck size="1rem" />
-              </ActionIcon>
-            </Tooltip>
-          </Flex>
-        </Group>
+        <HabitQuickLogInput habit={habit} />
 
         <Divider my="sm" />
 
         <Group justify="space-between" mt="md">
-          <Badge color={habit.goodHabit ? "green" : "red"} variant="light">
-            {habit.goodHabit ? "Build habit" : "Reduce habit"}
-          </Badge>
+          <GoodHabitBadge goodHabit={habit.goodHabit} />
 
           <Button
             variant="light"

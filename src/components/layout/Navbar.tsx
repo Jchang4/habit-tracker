@@ -4,17 +4,6 @@ import Link from "next/link";
 import { SignInButton, SignUpButton } from "./AuthButtons";
 import NavLinks from "./NavLinks";
 
-const ROUTES = [
-  {
-    label: "Habits",
-    href: "/habits",
-  },
-  {
-    label: "API Keys",
-    href: "/api-keys",
-  },
-];
-
 export default function Navbar() {
   return (
     <header>

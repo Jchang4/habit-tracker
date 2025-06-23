@@ -1,12 +1,7 @@
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button, Flex, Title } from "@mantine/core";
 import Link from "next/link";
+import { SignInButton, SignUpButton } from "./AuthButtons";
 
 const ROUTES = [
   {

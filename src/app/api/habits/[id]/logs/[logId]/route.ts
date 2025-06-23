@@ -4,10 +4,8 @@ import { withApiAuth } from "@/lib/with-api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
-  params: {
-    id: string; // habitId
-    logId: string;
-  };
+  // Habit ID
+  params: Promise<{ id: string; logId: string }>;
 };
 
 // Update a log
@@ -17,8 +15,10 @@ export const PUT = withApiAuth(
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id, logId } = await params;
+
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!habit) {
@@ -26,7 +26,7 @@ export const PUT = withApiAuth(
     }
 
     const log = await prisma.habitLog.findFirst({
-      where: { id: params.logId, habitId: params.id },
+      where: { id: logId, habitId: id },
     });
 
     if (!log) {
@@ -41,7 +41,7 @@ export const PUT = withApiAuth(
     const { day, week, month, year } = extractDateFields(logDate);
 
     const updatedLog = await prisma.habitLog.update({
-      where: { id: params.logId },
+      where: { id: logId },
       data: {
         amount,
         performedAt: logDate,
@@ -63,8 +63,10 @@ export const DELETE = withApiAuth(
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id, logId } = await params;
+
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!habit) {
@@ -72,7 +74,7 @@ export const DELETE = withApiAuth(
     }
 
     const log = await prisma.habitLog.findFirst({
-      where: { id: params.logId, habitId: params.id },
+      where: { id: logId, habitId: id },
     });
 
     if (!log) {
@@ -80,7 +82,7 @@ export const DELETE = withApiAuth(
     }
 
     await prisma.habitLog.delete({
-      where: { id: params.logId },
+      where: { id: logId },
     });
 
     return new NextResponse(null, { status: 204 });

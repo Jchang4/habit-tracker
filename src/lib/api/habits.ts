@@ -33,7 +33,7 @@ export interface UpdateHabitData {
 export const habitQueryKeys = {
   all: ["habits"] as const,
   lists: () => [...habitQueryKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
+  list: (filters: Record<string, string | number | boolean | undefined>) =>
     [...habitQueryKeys.lists(), { filters }] as const,
   details: () => [...habitQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...habitQueryKeys.details(), id] as const,

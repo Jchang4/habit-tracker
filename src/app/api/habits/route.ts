@@ -3,7 +3,7 @@ import { withApiAuth } from "@/lib/with-api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = withApiAuth(
-  async (req: NextRequest, { userId }: { userId: string }, context) => {
+  async (_req: NextRequest, { userId }: { userId: string }) => {
     const habits = await prisma.habit.findMany({
       where: { userId },
     });
@@ -12,7 +12,7 @@ export const GET = withApiAuth(
 );
 
 export const POST = withApiAuth(
-  async (req: NextRequest, { userId }: { userId: string }, context) => {
+  async (req: NextRequest, { userId }: { userId: string }) => {
     const body = await req.json();
     const { name, description, units, goodHabit, targetPerDay } = body;
 

@@ -29,7 +29,7 @@ export interface UpdateApiKeyData {
 export const apiKeyQueryKeys = {
   all: ["apiKeys"] as const,
   lists: () => [...apiKeyQueryKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
+  list: (filters: Record<string, string | number | boolean | undefined>) =>
     [...apiKeyQueryKeys.lists(), { filters }] as const,
   details: () => [...apiKeyQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...apiKeyQueryKeys.details(), id] as const,

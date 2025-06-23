@@ -4,9 +4,8 @@ import { withApiAuth } from "@/lib/with-api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
-  params: {
-    id: string; // habitId
-  };
+  // Habit ID
+  params: Promise<{ id: string }>;
 };
 
 // List logs for a habit
@@ -16,8 +15,10 @@ export const GET = withApiAuth(
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id } = await params;
+
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!habit) {
@@ -25,7 +26,7 @@ export const GET = withApiAuth(
     }
 
     const logs = await prisma.habitLog.findMany({
-      where: { habitId: params.id },
+      where: { habitId: id },
       orderBy: { performedAt: "desc" },
     });
 
@@ -40,8 +41,10 @@ export const POST = withApiAuth(
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id } = await params;
+
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!habit) {
@@ -59,7 +62,7 @@ export const POST = withApiAuth(
 
     const newLog = await prisma.habitLog.create({
       data: {
-        habitId: params.id,
+        habitId: id,
         userId,
         amount,
         performedAt: logDate,

@@ -3,19 +3,19 @@ import { withApiAuth } from "@/lib/with-api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 };
 
 export const GET = withApiAuth(
   async (
-    req: NextRequest,
+    _req: NextRequest,
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id } = await params;
+
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
     if (!habit) {
       return NextResponse.json({ error: "Habit not found" }, { status: 404 });
@@ -30,11 +30,12 @@ export const PUT = withApiAuth(
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id } = await params;
     const body = await req.json();
     const { name, description, units, goodHabit, targetPerDay } = body;
 
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!habit) {
@@ -42,7 +43,7 @@ export const PUT = withApiAuth(
     }
 
     const updatedHabit = await prisma.habit.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         description,
@@ -58,12 +59,14 @@ export const PUT = withApiAuth(
 
 export const DELETE = withApiAuth(
   async (
-    req: NextRequest,
+    _req: NextRequest,
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
+    const { id } = await params;
+
     const habit = await prisma.habit.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!habit) {
@@ -71,7 +74,7 @@ export const DELETE = withApiAuth(
     }
 
     await prisma.habit.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return new NextResponse(null, { status: 204 });

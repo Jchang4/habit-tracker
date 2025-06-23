@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // List API keys (excluding hash)
 export const GET = withApiAuth(
-  async (req: NextRequest, { userId }: { userId: string }, context) => {
+  async (_req: NextRequest, { userId }: { userId: string }) => {
     const keys = await prisma.apiKey.findMany({
       where: { userId },
       select: {
@@ -24,7 +24,7 @@ export const GET = withApiAuth(
 
 // Create a new API key
 export const POST = withApiAuth(
-  async (req: NextRequest, { userId }: { userId: string }, context) => {
+  async (req: NextRequest, { userId }: { userId: string }) => {
     const body = await req.json();
     const { name, description } = body;
 

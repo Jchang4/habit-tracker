@@ -3,35 +3,29 @@ import { withApiAuth } from "@/lib/with-api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
-  params: {
-    id: string; // apiKeyId
-  };
+  params: Promise<{ id: string }>;
 };
 
-// Update an API key
-export const PUT = withApiAuth(
+export const PUT = withApiAuth<RouteContext>(
   async (
     req: NextRequest,
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
-    const key = await prisma.apiKey.findFirst({
-      where: { id: params.id, userId },
-    });
+    const { id } = await params;
 
+    const key = await prisma.apiKey.findFirst({
+      where: { id, userId },
+    });
     if (!key) {
       return NextResponse.json({ error: "API key not found" }, { status: 404 });
     }
 
-    const body = await req.json();
-    const { name, description } = body;
+    const { name, description } = await req.json();
 
     const updatedKey = await prisma.apiKey.update({
-      where: { id: params.id },
-      data: {
-        name,
-        description,
-      },
+      where: { id },
+      data: { name, description },
       select: {
         id: true,
         name: true,
@@ -46,23 +40,23 @@ export const PUT = withApiAuth(
   }
 );
 
-// Revoke (soft delete) an API key
-export const DELETE = withApiAuth(
+export const DELETE = withApiAuth<RouteContext>(
   async (
-    req: NextRequest,
+    _req: NextRequest,
     { userId }: { userId: string },
     { params }: RouteContext
   ) => {
-    const key = await prisma.apiKey.findFirst({
-      where: { id: params.id, userId },
-    });
+    const { id } = await params;
 
+    const key = await prisma.apiKey.findFirst({
+      where: { id, userId },
+    });
     if (!key) {
       return NextResponse.json({ error: "API key not found" }, { status: 404 });
     }
 
     await prisma.apiKey.update({
-      where: { id: params.id },
+      where: { id },
       data: { revoked: true },
     });
 

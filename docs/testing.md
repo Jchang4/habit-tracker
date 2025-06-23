@@ -1,175 +1,294 @@
-# Testing Documentation
+# Testing Guide
+
+This document covers the testing setup and best practices for the Amor Habits application.
 
 ## Overview
 
-This project uses **Jest** as the testing framework, configured to work with Next.js and TypeScript. The test setup includes unit tests, integration tests, and utility function testing.
+Our testing framework uses **Jest** with **TypeScript** support and includes a comprehensive **reusable mock system** for consistent, maintainable tests.
 
-## Setup
+## Testing Architecture
 
-### Dependencies
+### Core Components
 
-- `jest` - Main testing framework
-- `@types/jest` - TypeScript definitions for Jest
-- `ts-jest` - TypeScript preprocessor for Jest
-- `@testing-library/jest-dom` - Additional Jest matchers
-- `supertest` - HTTP testing library (for future API testing)
-- `@types/supertest` - TypeScript definitions for supertest
+1. **Jest Configuration** (`jest.config.js`)
 
-### Configuration
+   - TypeScript integration via `ts-jest`
+   - Next.js-specific setup
+   - Custom test environment configuration
 
-- **`jest.config.js`** - Main Jest configuration
-- **`jest.setup.js`** - Test setup file for global configurations
-- **`tsconfig.json`** - TypeScript configuration (includes test files)
+2. **Global Test Setup** (`jest.setup.js`)
 
-## Test Scripts
+   - Mock initialization
+   - Global utilities
+   - Environment variable setup
 
-```bash
-# Run all tests once
-npm test
+3. **Reusable Mock System**
+   - `src/__mocks__/prisma.ts` - Mock Prisma client
+   - `src/__mocks__/with-api-auth.ts` - Mock authentication
+   - `src/test-utils/mock-data.ts` - Data factories
+   - `src/test-utils/test-setup.ts` - Test utilities
 
-# Run tests in watch mode (reruns on file changes)
-npm test:watch
+## Reusable Mock System
 
-# Run tests with coverage report
-npm test:coverage
+### Mock Data Factories
+
+Create consistent test data using factory functions:
+
+```typescript
+import {
+  createMockUser,
+  createMockHabit,
+  createMockHabitLog,
+  createMockUserWithData,
+} from "@/test-utils/mock-data";
+
+// Create individual entities
+const user = createMockUser({ id: "custom-user", email: "test@example.com" });
+const habit = createMockHabit({ name: "Exercise", userId: user.id });
+const log = createMockHabitLog({ habitId: habit.id, amount: 10 });
+
+// Create complete scenarios
+const mockData = createMockUserWithData("user-123", 3, 5); // 3 habits, 5 logs each
 ```
 
-## Test Structure
+### Mock Prisma Client
 
-### Unit Tests
+Automatically mocked database operations:
 
-Located alongside source files with `.test.ts` extension:
+```typescript
+import { mockPrisma, mockHabit, mockHabitLog } from "@/__mocks__/prisma";
 
-- **`src/lib/utils.test.ts`** - Tests for utility functions like `getWeekNumber()` and `extractDateFields()`
+// Setup specific mock responses
+mockHabit.findMany.mockResolvedValue([habit1, habit2, habit3]);
+mockHabitLog.create.mockResolvedValue(newLog);
 
-### Integration Tests
+// Verify database calls
+expect(mockPrisma.habit.create).toHaveBeenCalledWith({
+  data: expect.objectContaining({ name: "Test Habit" }),
+});
+```
 
-Located in dedicated test directories with `.integration.test.ts` extension:
+### Mock Authentication
 
-- **`src/app/api/habits/[id]/logs/route.integration.test.ts`** - Tests for habit logs API business logic
+Control authentication state in tests:
+
+```typescript
+import { mockAuth } from "@/__mocks__/with-api-auth";
+
+// Set authenticated user
+mockAuth.setUser({ id: "user-123", email: "test@example.com" });
+
+// Test unauthenticated requests
+mockAuth.clearUser();
+
+// Reset to default
+mockAuth.resetToDefault();
+```
+
+### Test Setup Utilities
+
+Comprehensive test scenario setup:
+
+```typescript
+import {
+  setupMockUserScenario,
+  setupHabitMocks,
+  resetAllMocks,
+  createMockRequest,
+  getResponseJson,
+} from "@/test-utils/test-setup";
+
+describe("API Tests", () => {
+  let mockData;
+
+  beforeEach(() => {
+    resetAllMocks();
+    mockData = setupMockUserScenario("user-123");
+  });
+
+  it("should test API endpoint", async () => {
+    const request = createMockRequest("GET", "/api/habits");
+    const response = await GET(request);
+    const data = await getResponseJson(response);
+
+    expect(response.status).toBe(200);
+    expect(data).toHaveLength(mockData.habits.length);
+  });
+});
+```
 
 ## Test Categories
 
-### 1. Utility Functions (`src/lib/utils.test.ts`)
+### 1. Unit Tests
 
-Tests the date extraction utilities used throughout the application:
+- **Purpose**: Test individual functions and utilities
+- **Location**: Alongside source files (e.g., `utils.test.ts`)
+- **Scope**: Pure functions, business logic, data transformations
 
-- `getWeekNumber()` - ISO week number calculation
-- `extractDateFields()` - Date field extraction for database storage
+### 2. Integration Tests
 
-**Key test cases:**
+- **Purpose**: Test API endpoints with mocked dependencies
+- **Location**: Next to route files (e.g., `route.integration.test.ts`)
+- **Scope**: HTTP handlers, authentication, database interactions
 
-- Correct week number calculation for various dates
-- Proper date field extraction (day, week, month, year)
-- Timezone handling
-- Edge cases (leap years, year boundaries)
+### 3. Mock System Tests
 
-### 2. API Integration Tests (`route.integration.test.ts`)
+- **Purpose**: Verify the mock system itself works correctly
+- **Location**: `src/test-utils/__tests__/`
+- **Scope**: Mock factories, test utilities, setup functions
 
-Tests the business logic and data consistency for the habit logs API:
+## Current Test Coverage
 
-- Date field extraction consistency
-- Required field validation
-- Error handling for invalid dates
-- Data consistency across different time zones
-- Week boundary calculations
+✅ **Utility Functions** (`src/lib/utils.test.ts`)
 
-**Test groups:**
+- Date field extraction and validation
+- Week number calculations
+- Timezone handling and edge cases
 
-- **Date field extraction** - Core date processing logic
-- **API Route Logic** - Business logic validation
-- **Error Handling** - Graceful handling of edge cases
-- **Data Consistency** - Ensuring data integrity
+✅ **Mock System** (`src/test-utils/__tests__/mock-system.test.ts`)
 
-## Testing Best Practices
+- Mock data factory validation
+- Relationship consistency
+- Date field generation
 
-### 1. Date Testing
+✅ **Habit Log Operations** (Individual log CRUD)
 
-Since date handling can be tricky with timezones, our tests:
+- Business logic validation
+- Date field recalculation
+- Authorization and security
 
-- Use local timezone dates (`new Date(2023, 6, 15)`) instead of UTC strings
-- Test edge cases like midnight, leap years, and week boundaries
-- Verify consistency between different representations of the same date
+✅ **Mock Data Factories**
 
-### 2. Integration Testing Approach
-
-Instead of complex mocking, we focus on:
-
-- Testing actual business logic functions
-- Validating data transformations
-- Ensuring consistency of extracted fields
-- Testing error handling scenarios
-
-### 3. Test Organization
-
-Tests are organized by functionality:
-
-- **Unit tests** for individual functions
-- **Integration tests** for business logic workflows
-- **Error handling** tests for edge cases
-- **Data consistency** tests for data integrity
-
-## Future Testing Plans
-
-### API Route Testing
-
-For full API route testing, we'll implement:
-
-- Mock database calls with proper TypeScript typing
-- Request/response testing with supertest
-- Authentication middleware testing
-- End-to-end API workflows
-
-### Component Testing
-
-When building the frontend:
-
-- React component testing with React Testing Library
-- User interaction testing
-- Integration tests with API calls
+- Reusable across all test suites
+- Consistent data structure
+- Automatic relationship handling
 
 ## Running Tests
 
-### Development Workflow
+```bash
+# Run all tests
+npm test
 
-1. Write tests alongside new features
-2. Run `npm test:watch` during development
-3. Ensure all tests pass before committing
-4. Use `npm test:coverage` to check test coverage
+# Run specific test file
+npm test src/lib/utils.test.ts
 
-### CI/CD Integration
+# Run tests in watch mode
+npm run test:watch
 
-Tests are designed to run in CI environments:
+# Generate coverage report
+npm run test:coverage
+```
 
-- No external dependencies required
-- Consistent timezone handling
-- Fast execution (all tests run in ~100ms)
+## Best Practices
+
+### 1. Use Mock Factories
+
+```typescript
+// ✅ Good - Reusable and consistent
+const user = createMockUser({ id: "test-user" });
+
+// ❌ Avoid - Inconsistent and verbose
+const user = { id: "test-user", email: "test@...", createdAt: new Date(), ... };
+```
+
+### 2. Setup Complete Scenarios
+
+```typescript
+// ✅ Good - Complete scenario with relationships
+const mockData = setupMockUserScenario("user-123");
+setupHabitMocks(mockData, "habit-1");
+
+// ❌ Avoid - Partial setup that might miss dependencies
+mockUser.findUnique.mockResolvedValue(someUser);
+```
+
+### 3. Reset Mocks Between Tests
+
+```typescript
+beforeEach(() => {
+  resetAllMocks(); // Ensures clean state
+  mockData = setupMockUserScenario("user-123");
+});
+```
+
+### 4. Test Authentication Properly
+
+```typescript
+it("should require authentication", async () => {
+  mockAuth.clearUser(); // Simulate unauthenticated request
+
+  const response = await GET(request);
+  expect(response.status).toBe(401);
+});
+```
+
+### 5. Verify Database Interactions
+
+```typescript
+expect(mockPrisma.habit.create).toHaveBeenCalledWith({
+  data: expect.objectContaining({
+    name: "Expected Habit Name",
+    userId: "user-123",
+  }),
+});
+```
+
+## Mock System Benefits
+
+✅ **Consistency** - Same data structure across all tests
+✅ **Maintainability** - Change once, update everywhere  
+✅ **Relationships** - Automatic handling of foreign keys
+✅ **Reusability** - Share mocks across test suites
+✅ **Isolation** - Tests don't affect each other
+✅ **Speed** - No database operations during tests
+✅ **Reliability** - Predictable test data
+
+## Date Field Testing
+
+The application automatically calculates date fields (day, week, month, year) from `performedAt` timestamps. Our tests extensively validate:
+
+- **Date Field Extraction**: Correct calculation of all date components
+- **Timezone Handling**: Consistent behavior across different timezones
+- **Edge Cases**: Leap years, year boundaries, invalid dates
+- **Recalculation**: Updates when `performedAt` changes
+- **Consistency**: Same day different times produce identical date fields
+
+## Future Enhancements
+
+🔄 **Integration Test Improvements**
+
+- Full API route testing with proper mock integration
+- Request/response validation
+- Error handling verification
+
+🔄 **Additional Mock Types**
+
+- Email service mocks
+- External API mocks
+- File system mocks
+
+🔄 **Test Utilities**
+
+- Database state assertions
+- Response validation helpers
+- Authentication test helpers
 
 ## Troubleshooting
 
-### Common Issues
+### Mock Not Working
 
-**Watchman warnings**: These can be safely ignored. They don't affect test execution.
+- Ensure `resetAllMocks()` is called in `beforeEach`
+- Check mock is imported correctly
+- Verify Jest configuration includes mock paths
 
-**Timezone issues**: If date tests fail, ensure you're using local timezone dates in tests rather than UTC strings.
+### Date Test Failures
 
-**Module resolution**: The `@/` alias is configured to resolve to `src/` directory.
+- Use local timezone dates in tests
+- Use `toBeFalsy()` instead of `toBe(false)` for JavaScript truthiness
+- Ensure consistent date creation methods
 
-### Test Debugging
+### Authentication Issues
 
-- Use `console.log()` in tests for debugging
-- Run single test files: `npm test -- utils.test.ts`
-- Use `--verbose` flag for detailed output: `npm test -- --verbose`
-
-## Coverage Goals
-
-Current test coverage focuses on:
-
-- ✅ Core utility functions (100%)
-- ✅ Date extraction logic (100%)
-- ✅ Business logic validation (100%)
-- 🔄 API routes (integration tests only)
-- ⏳ Authentication middleware (planned)
-- ⏳ Database operations (planned)
-
-Target coverage: **80%** for critical business logic paths.
+- Use `mockAuth.setUser()` to set authenticated user
+- Call `mockAuth.clearUser()` to test unauthenticated scenarios
+- Verify auth middleware is properly mocked

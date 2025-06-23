@@ -35,13 +35,16 @@ export const PUT = withApiAuth(
 
     const body = await req.json();
     const { amount, performedAt } = body;
-    const { day, week, month, year } = extractDateFields(performedAt);
+
+    // Parse the performedAt date or use current time if not provided
+    const logDate = performedAt ? new Date(performedAt) : new Date();
+    const { day, week, month, year } = extractDateFields(logDate);
 
     const updatedLog = await prisma.habitLog.update({
       where: { id: params.logId },
       data: {
         amount,
-        performedAt,
+        performedAt: logDate,
         day,
         week,
         month,

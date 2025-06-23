@@ -1,5 +1,5 @@
-import { CreateHabitModal } from "@/components/habits/CreateHabitModal";
 import { HabitList } from "@/components/habits/HabitList";
+import { CreateHabitModal } from "@/components/habits/modals/CreateHabitModal";
 import { Container, Group, Stack, Title } from "@mantine/core";
 
 export default function HabitsPage() {

@@ -1,6 +1,11 @@
 "use client";
 
-import { CreateHabitData, useCreateHabit } from "@/lib/api/habits";
+import {
+  CreateHabitData,
+  Habit,
+  useCreateHabit,
+  useUpdateHabit,
+} from "@/lib/api/habits";
 import {
   Box,
   Button,
@@ -12,14 +17,19 @@ import {
   Textarea,
   Title,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-interface CreateHabitFormProps {
+interface HabitFormProps {
+  mode: "create" | "edit";
+  initialData?: Habit;
   onSuccess?: () => void;
 }
 
-export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
-  const { mutate: createHabit, isPending } = useCreateHabit();
+export function HabitForm({ mode, initialData, onSuccess }: HabitFormProps) {
+  const { mutate: createHabit, isPending: isCreating } = useCreateHabit();
+  const { mutate: updateHabit, isPending: isUpdating } = useUpdateHabit();
+
+  const isPending = isCreating || isUpdating;
 
   const [formData, setFormData] = useState<CreateHabitData>({
     name: "",
@@ -29,6 +39,20 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
     goodHabit: true,
     targetPerDay: 1,
   });
+
+  // Set initial form data when editing
+  useEffect(() => {
+    if (mode === "edit" && initialData) {
+      setFormData({
+        name: initialData.name,
+        description: initialData.description || "",
+        units: initialData.units,
+        defaultAmount: initialData.defaultAmount,
+        goodHabit: initialData.goodHabit,
+        targetPerDay: initialData.targetPerDay,
+      });
+    }
+  }, [mode, initialData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,30 +72,45 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createHabit(formData, {
-      onSuccess: () => {
-        // Reset form after successful creation
-        setFormData({
-          name: "",
-          description: "",
-          units: "",
-          defaultAmount: 1,
-          goodHabit: true,
-          targetPerDay: 1,
-        });
 
-        // Call the onSuccess callback if provided
-        if (onSuccess) {
-          onSuccess();
+    if (mode === "create") {
+      createHabit(formData, {
+        onSuccess: () => {
+          // Reset form after successful creation
+          setFormData({
+            name: "",
+            description: "",
+            units: "",
+            defaultAmount: 1,
+            goodHabit: true,
+            targetPerDay: 1,
+          });
+
+          if (onSuccess) {
+            onSuccess();
+          }
+        },
+      });
+    } else if (mode === "edit" && initialData) {
+      updateHabit(
+        { id: initialData.id, data: formData },
+        {
+          onSuccess: () => {
+            if (onSuccess) {
+              onSuccess();
+            }
+          },
         }
-      },
-    });
+      );
+    }
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Stack gap="md">
-        <Title order={3}>Create New Habit</Title>
+        <Title order={3}>
+          {mode === "create" ? "Create New Habit" : "Edit Habit"}
+        </Title>
 
         <TextInput
           required
@@ -126,7 +165,7 @@ export function CreateHabitForm({ onSuccess }: CreateHabitFormProps) {
         />
 
         <Button type="submit" loading={isPending}>
-          Create Habit
+          {mode === "create" ? "Create Habit" : "Update Habit"}
         </Button>
       </Stack>
     </Box>

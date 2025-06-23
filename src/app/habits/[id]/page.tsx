@@ -5,6 +5,8 @@ import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
 import { GoodHabitBadge } from "@/components/habits/GoodHabitBadge";
 import { DailyUsagePieChart } from "@/components/habits/charts/DailyUsagePieChart";
 import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
+import { DeleteHabitModal } from "@/components/habits/modals/DeleteHabitModal";
+import { EditHabitModal } from "@/components/habits/modals/EditHabitModal";
 import { useHabit } from "@/lib/api/habits";
 import {
   Alert,
@@ -71,7 +73,7 @@ export default function HabitPage({ params }: HabitPageProps) {
   }
 
   return (
-    <Stack gap="lg" p="md">
+    <Stack gap="lg" p="md" pb="8rem">
       {/* Header */}
       <Group justify="space-between" align="center">
         <div>
@@ -82,7 +84,10 @@ export default function HabitPage({ params }: HabitPageProps) {
             </Text>
           )}
         </div>
-        <GoodHabitBadge goodHabit={habit.goodHabit} />
+        <Group>
+          <EditHabitModal habit={habit} />
+          <GoodHabitBadge goodHabit={habit.goodHabit} />
+        </Group>
       </Group>
 
       {/* Main Content Grid */}
@@ -199,6 +204,10 @@ export default function HabitPage({ params }: HabitPageProps) {
         </Text>
         <HabitLogsTable habitId={habit.id} />
       </Card>
+
+      <Group justify="flex-end">
+        <DeleteHabitModal habit={habit} />
+      </Group>
     </Stack>
   );
 }

@@ -49,6 +49,7 @@ model HabitLog {
   week  Int
   month Int
   year  Int
+  hour  Int
 
   // Calendar
   calendarEventId    String?   // Google Calendar event ID
@@ -64,6 +65,7 @@ model HabitLog {
   @@index([week])
   @@index([month])
   @@index([year])
+  @@index([hour])
   @@index([calendarEventId])
 }
 

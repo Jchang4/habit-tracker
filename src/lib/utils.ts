@@ -22,6 +22,7 @@ export function extractDateFields(date: Date) {
     week: getWeekNumber(date),
     month: date.getMonth() + 1, // JavaScript months are 0-indexed
     year: date.getFullYear(),
+    hour: date.getHours(),
   };
 }
 

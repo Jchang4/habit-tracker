@@ -32,7 +32,7 @@ export interface PaginatedHabitLogs {
 
 export interface HabitLogStats {
   habitId: string;
-  breakdown: "day" | "week" | "month" | "year";
+  breakdown: "hour" | "hourly_detail" | "day" | "week" | "month" | "year";
   timeRange: {
     startDate: string;
     endDate: string;
@@ -65,7 +65,7 @@ export interface FetchHabitLogsParams {
 
 export interface FetchHabitLogStatsParams {
   habitId: string;
-  breakdown?: "day" | "week" | "month" | "year";
+  breakdown?: "hour" | "hourly_detail" | "day" | "week" | "month" | "year";
   startDate?: string;
   endDate?: string;
 }
@@ -257,7 +257,7 @@ export const useInfiniteHabitLogs = (
 export const useHabitLogStats = (
   habitId: string,
   options?: {
-    breakdown?: "day" | "week" | "month" | "year";
+    breakdown?: "hour" | "hourly_detail" | "day" | "week" | "month" | "year";
     startDate?: string;
     endDate?: string;
   }

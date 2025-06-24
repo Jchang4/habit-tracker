@@ -6,7 +6,13 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-type TimeBreakdown = "day" | "week" | "month" | "year";
+type TimeBreakdown =
+  | "hour"
+  | "hourly_detail"
+  | "day"
+  | "week"
+  | "month"
+  | "year";
 
 // Type for raw database query results
 interface StatsQueryResult {
@@ -53,6 +59,42 @@ export const GET = withApiAuth(
     let stats: StatsQueryResult[];
 
     switch (breakdown) {
+      case "hour":
+        // Group by hour only (0-23)
+        stats = await prisma.$queryRaw`
+          SELECT 
+            CAST("hour" AS TEXT) as "timeKey",
+            SUM("amount") as "total",
+            COUNT(*) as "count",
+            AVG("amount") as "average"
+          FROM "HabitLog"
+          WHERE 
+            "habitId" = ${id}
+            AND "performedAt" >= ${startDate}
+            AND "performedAt" <= ${endDate}
+          GROUP BY "hour"
+          ORDER BY "hour" ASC
+        `;
+        break;
+
+      case "hourly_detail":
+        // Group by date and hour for detailed hourly breakdown
+        stats = await prisma.$queryRaw`
+          SELECT 
+            CONCAT(TO_CHAR("day", 'YYYY-MM-DD'), ' ', LPAD(CAST("hour" AS TEXT), 2, '0'), ':00') as "timeKey",
+            SUM("amount") as "total",
+            COUNT(*) as "count",
+            AVG("amount") as "average"
+          FROM "HabitLog"
+          WHERE 
+            "habitId" = ${id}
+            AND "performedAt" >= ${startDate}
+            AND "performedAt" <= ${endDate}
+          GROUP BY "day", "hour"
+          ORDER BY "day" ASC, "hour" ASC
+        `;
+        break;
+
       case "day":
         // Group by day
         stats = await prisma.$queryRaw`

@@ -33,6 +33,7 @@ export default function RootLayout({
         <MantineProvider>
           <ClerkProvider>
             <Navbar />
+            <div style={{ marginTop: 100 }} />
             <ReactQueryProvider>{children}</ReactQueryProvider>
           </ClerkProvider>
         </MantineProvider>

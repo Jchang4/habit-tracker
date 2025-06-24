@@ -142,12 +142,7 @@ export default function HabitPage({ params }: HabitPageProps) {
       </Card>
 
       {/* API Access */}
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Text fw={500} size="lg" mb="md">
-          API Access
-        </Text>
-        <CopyHabitApiUrl habit={habit} />
-      </Card>
+      <CopyHabitApiUrl habit={habit} />
 
       <Group justify="flex-end">
         <DeleteHabitModal habit={habit} />
@@ -174,7 +169,6 @@ const TodaysProgressCard = ({ habitId }: { habitId: string }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "2px dashed #dee2e6",
         }}
       >
         <DailyUsagePieChart habitId={habitId} />

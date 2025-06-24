@@ -68,5 +68,15 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.redirect(new URL("/habits", req.url));
+  // Get the protocol and host from headers for proper redirect
+  const protocol = req.headers.get("x-forwarded-proto") || "http";
+  const host =
+    req.headers.get("host") ||
+    req.headers.get("x-forwarded-host") ||
+    new URL(req.url).host;
+
+  // Create the redirect URL with the correct domain
+  const redirectUrl = `${protocol}://${host}/habits`;
+
+  return NextResponse.redirect(redirectUrl);
 }

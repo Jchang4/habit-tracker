@@ -1,10 +1,11 @@
 "use client";
 
-import { useHabitLogs } from "@/lib/api/habit-logs";
+import { useHabitLogStats } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
 import { Sparkline } from "@mantine/charts";
 import { Box, Group, Skeleton, Text } from "@mantine/core";
-import { format } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
+import { useMemo } from "react";
 
 interface DailyUsageSparklineProps {
   habitId: string;
@@ -15,45 +16,44 @@ export function DailyUsageSparkline({
   habitId,
   days = 14,
 }: DailyUsageSparklineProps) {
-  const { data: logs, isLoading: isLogsLoading } = useHabitLogs(habitId);
+  // Memoize date range based on days to prevent re-renders
+  const dateRange = useMemo(() => {
+    const end = endOfDay(new Date());
+    const start = startOfDay(new Date());
+    start.setDate(end.getDate() - days + 1);
+
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    };
+  }, [days]);
+
+  const { data: statsData, isLoading: isStatsLoading } = useHabitLogStats(
+    habitId,
+    {
+      breakdown: "day",
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    }
+  );
+
   const { data: habit, isLoading: isHabitLoading } = useHabit(habitId);
 
-  const isLoading = isLogsLoading || isHabitLoading;
+  const isLoading = isStatsLoading || isHabitLoading;
 
   if (isLoading) {
     return <Skeleton height={60} />;
   }
 
-  if (!logs || !habit) {
+  if (!statsData || !habit) {
     return null;
   }
 
-  // Generate data for the last N days
-  const generateSparklineData = (numDays: number) => {
-    const today = new Date();
-    const daysMap = new Map();
-
-    // Initialize with zeros for all days
-    for (let i = 0; i < numDays; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() - i);
-      const formattedDate = format(date, "yyyy-MM-dd");
-      daysMap.set(formattedDate, 0);
-    }
-
-    // Sum up amounts for each day
-    logs.forEach((log) => {
-      const logDate = format(new Date(log.performedAt), "yyyy-MM-dd");
-      if (daysMap.has(logDate)) {
-        daysMap.set(logDate, daysMap.get(logDate) + log.amount);
-      }
-    });
-
-    // Convert to array of values (oldest to newest)
-    return Array.from(daysMap.values()).reverse();
-  };
-
-  const sparklineData = generateSparklineData(days);
+  // Process stats data for sparkline
+  // Sort by date and extract just the values
+  const sparklineData = statsData.stats
+    .sort((a, b) => a.timeKey.localeCompare(b.timeKey))
+    .map((stat) => stat.total);
 
   // Calculate trend (first value vs last value)
   const firstValue = sparklineData[0] || 0;

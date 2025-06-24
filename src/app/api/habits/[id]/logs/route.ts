@@ -2,6 +2,7 @@ import { syncHabitLogWithCalendar } from "@/lib/google/calendar.server";
 import { prisma } from "@/lib/prisma";
 import { extractDateFields } from "@/lib/utils";
 import { withApiAuth } from "@/lib/with-api-auth";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
@@ -17,6 +18,16 @@ export const GET = withApiAuth(
     { params }: RouteContext
   ) => {
     const { id } = await params;
+    const searchParams = req.nextUrl.searchParams;
+
+    // Parse pagination parameters
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const skip = (page - 1) * limit;
+
+    // Parse date range parameters
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
     const habit = await prisma.habit.findFirst({
       where: { id, userId },
@@ -26,12 +37,49 @@ export const GET = withApiAuth(
       return NextResponse.json({ error: "Habit not found" }, { status: 404 });
     }
 
-    const logs = await prisma.habitLog.findMany({
-      where: { habitId: id },
-      orderBy: { performedAt: "desc" },
+    // Build where conditions for date filtering
+    const whereConditions: Prisma.HabitLogWhereInput = { habitId: id };
+
+    if (startDate || endDate) {
+      whereConditions.performedAt = {};
+
+      if (startDate) {
+        whereConditions.performedAt = {
+          ...whereConditions.performedAt,
+          gte: new Date(startDate),
+        };
+      }
+
+      if (endDate) {
+        whereConditions.performedAt = {
+          ...whereConditions.performedAt,
+          lte: new Date(endDate),
+        };
+      }
+    }
+
+    // Get total count for pagination
+    const totalCount = await prisma.habitLog.count({
+      where: whereConditions,
     });
 
-    return NextResponse.json(logs);
+    // Get paginated logs
+    const logs = await prisma.habitLog.findMany({
+      where: whereConditions,
+      orderBy: { performedAt: "desc" },
+      skip,
+      take: limit,
+    });
+
+    return NextResponse.json({
+      logs,
+      pagination: {
+        page,
+        limit,
+        totalItems: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    });
   }
 );
 

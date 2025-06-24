@@ -1,11 +1,18 @@
 "use client";
 
-import { useHabitLogs } from "@/lib/api/habit-logs";
+import { useHabitLogStats } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
 import { BarChart } from "@mantine/charts";
 import { SegmentedControl, Skeleton } from "@mantine/core";
-import { format } from "date-fns";
-import { useState } from "react";
+import {
+  addDays,
+  eachDayOfInterval,
+  endOfDay,
+  format,
+  parseISO,
+  startOfDay,
+} from "date-fns";
+import { useMemo, useState } from "react";
 
 interface DailyUsageBarChartProps {
   habitId: string;
@@ -13,69 +20,75 @@ interface DailyUsageBarChartProps {
 
 export function DailyUsageBarChart({ habitId }: DailyUsageBarChartProps) {
   const [daysToShow, setDaysToShow] = useState<string>("7");
-  const { data: logs, isLoading: isLogsLoading } = useHabitLogs(habitId);
+
+  // Calculate date range based on days to show - memoized to avoid re-renders
+  const dateRange = useMemo(() => {
+    const end = endOfDay(new Date());
+    const start = startOfDay(new Date());
+    start.setDate(end.getDate() - parseInt(daysToShow, 10) + 1);
+
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    };
+  }, [daysToShow]);
+
+  const { data: statsData, isLoading: isStatsLoading } = useHabitLogStats(
+    habitId,
+    {
+      breakdown: "day",
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    }
+  );
+
   const { data: habit, isLoading: isHabitLoading } = useHabit(habitId);
 
-  const isLoading = isLogsLoading || isHabitLoading;
+  const isLoading = isStatsLoading || isHabitLoading;
 
   if (isLoading) {
     return <Skeleton height={300} />;
   }
 
-  if (!logs || !habit) {
+  if (!statsData || !habit) {
     return null;
   }
 
-  // Generate an array of the last N days (including today)
-  const generateDaysArray = (numDays: number) => {
-    const days = [];
-    const today = new Date();
+  // Create a map of dates to stats for quick lookup
+  const statsMap = new Map();
+  statsData.stats.forEach((stat) => {
+    statsMap.set(stat.timeKey, stat);
+  });
 
-    for (let i = 0; i < numDays; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() - i);
-      const formattedDate = format(date, "yyyy-MM-dd"); // Use date-fns consistently
-      days.push({
-        date: formattedDate,
-        displayDate:
-          i === 0
-            ? "Today"
-            : i === 1
-            ? "Yesterday"
-            : formatDateForDisplay(date),
-        amount: 0,
-      });
-    }
+  // Parse the date range for generating all dates
+  const startDateObj = parseISO(dateRange.startDate);
+  const endDateObj = parseISO(dateRange.endDate);
 
-    return days;
-  };
+  // Generate all dates in the range
+  const allDates = eachDayOfInterval({ start: startDateObj, end: endDateObj });
 
-  const formatDateForDisplay = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  // Format the stats data for the chart, including all days in the range
+  const chartData = allDates
+    .map((date) => {
+      const dateKey = format(date, "yyyy-MM-dd");
+      const stat = statsMap.get(dateKey);
+      const isToday =
+        format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+      const isYesterday =
+        format(date, "yyyy-MM-dd") ===
+        format(addDays(new Date(), -1), "yyyy-MM-dd");
 
-  // Group logs by day and calculate total amount per day
-  const processLogsData = (numDays: number) => {
-    const daysArray = generateDaysArray(numDays);
-    const daysMap = new Map(daysArray.map((day) => [day.date, { ...day }]));
-
-    // Sum up amounts for each day
-    logs.forEach((log) => {
-      const logDate = format(new Date(log.performedAt), "yyyy-MM-dd");
-      if (daysMap.has(logDate)) {
-        const day = daysMap.get(logDate)!;
-        day.amount += log.amount;
-      }
-    });
-
-    return Array.from(daysMap.values());
-  };
-
-  const chartData = processLogsData(parseInt(daysToShow, 10));
+      return {
+        date: dateKey,
+        displayDate: isToday
+          ? "Today"
+          : isYesterday
+          ? "Yesterday"
+          : formatDateForDisplay(date),
+        amount: stat ? stat.total : 0,
+      };
+    })
+    .reverse(); // Most recent days first
 
   // Custom value formatter for tooltip and labels
   const valueFormatter = (value: number): string => {
@@ -120,4 +133,12 @@ export function DailyUsageBarChart({ habitId }: DailyUsageBarChartProps) {
       />
     </>
   );
+}
+
+function formatDateForDisplay(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }

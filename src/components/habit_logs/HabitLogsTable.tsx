@@ -3,7 +3,7 @@
 import {
   HabitLog,
   useDeleteHabitLog,
-  useHabitLogs,
+  useInfiniteHabitLogs,
 } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
 import {
@@ -11,15 +11,22 @@ import {
   Alert,
   Badge,
   Box,
+  Button,
+  Center,
   Group,
-  Pagination,
   Skeleton,
   Stack,
   Table,
   Text,
   Tooltip,
 } from "@mantine/core";
-import { IconAlertCircle, IconEdit, IconTrash } from "@tabler/icons-react";
+import { DatePickerInput, DatesRangeValue } from "@mantine/dates";
+import {
+  IconAlertCircle,
+  IconCalendar,
+  IconEdit,
+  IconTrash,
+} from "@tabler/icons-react";
 import { format } from "date-fns";
 import { useState } from "react";
 
@@ -29,15 +36,25 @@ interface HabitLogsTableProps {
 }
 
 export function HabitLogsTable({ habitId, onEditLog }: HabitLogsTableProps) {
-  const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
 
   // Fetch habit logs and habit details
   const {
-    data: logs,
+    data,
     isLoading: logsLoading,
     error: logsError,
-  } = useHabitLogs(habitId);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteHabitLogs(habitId, {
+    limit: pageSize,
+    startDate: dateRange[0] ? dateRange[0].toISOString() : undefined,
+    endDate: dateRange[1] ? dateRange[1].toISOString() : undefined,
+  });
 
   const { data: habit, isLoading: habitLoading } = useHabit(habitId);
 
@@ -61,17 +78,20 @@ export function HabitLogsTable({ habitId, onEditLog }: HabitLogsTableProps) {
     );
   }
 
+  // Flatten the pages of logs
+  const logs = data?.pages.flatMap((page) => page.logs) || [];
+  const totalItems = data?.pages[0]?.pagination.totalItems || 0;
+
   if (!logs || logs.length === 0) {
     return (
-      <Text>
-        No logs found for this habit. Start tracking to see your progress!
-      </Text>
+      <Stack gap="md">
+        <DateRangeFilter dateRange={dateRange} setDateRange={setDateRange} />
+        <Text>
+          No logs found for this habit. Start tracking to see your progress!
+        </Text>
+      </Stack>
     );
   }
-
-  // Calculate pagination
-  const totalPages = Math.ceil(logs.length / pageSize);
-  const paginatedLogs = logs.slice((page - 1) * pageSize, page * pageSize);
 
   // Handle log deletion
   const handleDelete = (logId: string) => {
@@ -87,9 +107,11 @@ export function HabitLogsTable({ habitId, onEditLog }: HabitLogsTableProps) {
           Logs for {habit?.name}
         </Text>
         <Badge size="lg">
-          {logs.length} {logs.length === 1 ? "entry" : "entries"}
+          {totalItems} {totalItems === 1 ? "entry" : "entries"}
         </Badge>
       </Group>
+
+      <DateRangeFilter dateRange={dateRange} setDateRange={setDateRange} />
 
       <Box style={{ overflowX: "auto" }}>
         <Table striped highlightOnHover>
@@ -102,7 +124,7 @@ export function HabitLogsTable({ habitId, onEditLog }: HabitLogsTableProps) {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {paginatedLogs.map((log) => {
+            {logs.map((log) => {
               const date = new Date(log.performedAt);
               return (
                 <Table.Tr key={log.id}>
@@ -142,11 +164,45 @@ export function HabitLogsTable({ habitId, onEditLog }: HabitLogsTableProps) {
         </Table>
       </Box>
 
-      {totalPages > 1 && (
-        <Group justify="center">
-          <Pagination value={page} onChange={setPage} total={totalPages} />
-        </Group>
+      {hasNextPage && (
+        <Center>
+          <Button
+            onClick={() => fetchNextPage()}
+            loading={isFetchingNextPage}
+            variant="outline"
+          >
+            Load More
+          </Button>
+        </Center>
       )}
     </Stack>
+  );
+}
+
+interface DateRangeFilterProps {
+  dateRange: [Date | null, Date | null];
+  setDateRange: (range: [Date | null, Date | null]) => void;
+}
+
+function DateRangeFilter({ dateRange, setDateRange }: DateRangeFilterProps) {
+  const handleDateChange = (value: DatesRangeValue) => {
+    setDateRange([
+      value[0] ? new Date(value[0]) : null,
+      value[1] ? new Date(value[1]) : null,
+    ]);
+  };
+
+  return (
+    <Group>
+      <DatePickerInput
+        type="range"
+        label="Filter by date range"
+        placeholder="Select date range"
+        value={dateRange}
+        onChange={handleDateChange}
+        clearable
+        leftSection={<IconCalendar size="1rem" />}
+      />
+    </Group>
   );
 }

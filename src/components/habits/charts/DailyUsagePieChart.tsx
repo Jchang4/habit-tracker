@@ -1,6 +1,6 @@
 "use client";
 
-import { useHabitLogs } from "@/lib/api/habit-logs";
+import { useHabitLogStats } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
 import { PieChart } from "@mantine/charts";
 import {
@@ -13,7 +13,7 @@ import {
   Title,
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
-import { format, isToday, parseISO } from "date-fns";
+import { addDays, endOfDay, format, startOfDay } from "date-fns";
 import { useMemo } from "react";
 
 interface DailyUsagePieChartProps {
@@ -27,71 +27,62 @@ export function DailyUsagePieChart({
   title = "Daily Usage",
   size = 300,
 }: DailyUsagePieChartProps) {
-  // Fetch habit logs and habit details
+  // Memoize date values to prevent re-renders
+  const dateRange = useMemo(() => {
+    const today = startOfDay(new Date());
+    const tomorrow = endOfDay(addDays(today, 1));
+
+    return {
+      todayStr: format(today, "yyyy-MM-dd"),
+      startDate: today.toISOString(),
+      endDate: tomorrow.toISOString(),
+    };
+  }, []);
+
+  // Fetch habit stats for today
   const {
-    data: logs,
-    isLoading: logsLoading,
-    error: logsError,
-  } = useHabitLogs(habitId);
+    data: statsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useHabitLogStats(habitId, {
+    breakdown: "day",
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  });
 
   const { data: habit, isLoading: habitLoading } = useHabit(habitId);
 
   // Process data for pie chart
   const chartData = useMemo(() => {
-    if (!logs || logs.length === 0) return [];
+    if (!statsData || !habit) return [];
 
-    // Group logs by date
-    const dailyTotals = logs.reduce((acc, log) => {
-      const date = format(parseISO(log.performedAt), "yyyy-MM-dd");
-      const dayName = format(parseISO(log.performedAt), "EEEE");
-      const isCurrentDay = isToday(parseISO(log.performedAt));
-
-      if (!acc[date]) {
-        acc[date] = {
-          date,
-          dayName,
-          total: 0,
-          isToday: isCurrentDay,
-        };
-      }
-      acc[date].total += log.amount || 0;
-      return acc;
-    }, {} as Record<string, { date: string; dayName: string; total: number; isToday: boolean }>);
-
-    // Convert to array and sort by date (most recent first)
-    const today = format(new Date(), "yyyy-MM-dd");
-    const todayData = dailyTotals[today]
-      ? dailyTotals[today]
-      : {
-          date: today,
-          dayName: "Today",
-          total: 0,
-          isToday: true,
-        };
+    // Get today's data if available
+    const todayData = statsData.stats.find(
+      (stat) => stat.timeKey === dateRange.todayStr
+    );
+    const todayTotal = todayData?.total || 0;
 
     // Generate colors for pie chart segments
-    const colors = [habit?.goodHabit ? "blue.6" : "red.5", "gray.6"];
+    const colors = [habit.goodHabit ? "blue.6" : "red.5", "gray.6"];
     const chartData = [
       {
-        name: todayData.isToday
-          ? `Today (${todayData.dayName})`
-          : format(new Date(todayData.date), "MMM d"),
-        value: todayData.total,
+        name: "Today",
+        value: todayTotal,
         color: colors[0],
       },
     ];
 
     // If user has not hit limit for today, add a "Remaining" segment
-    if (todayData.total < (habit?.targetPerDay || 0)) {
+    if (todayTotal < (habit.targetPerDay || 0)) {
       chartData.push({
         name: "Remaining",
-        value: (habit?.targetPerDay || 0) - todayData.total,
+        value: (habit.targetPerDay || 0) - todayTotal,
         color: colors[1],
       });
     }
 
     return chartData;
-  }, [logs]);
+  }, [statsData, habit, dateRange.todayStr]);
 
   // Calculate total usage
   const totalUsage = useMemo(() => {
@@ -99,7 +90,7 @@ export function DailyUsagePieChart({
   }, [chartData]);
 
   // Handle loading states
-  if (logsLoading || habitLoading) {
+  if (statsLoading || habitLoading) {
     return (
       <Stack gap="md" align="center">
         <Skeleton height={20} width={200} />
@@ -109,16 +100,16 @@ export function DailyUsagePieChart({
   }
 
   // Handle error states
-  if (logsError) {
+  if (statsError) {
     return (
       <Alert icon={<IconAlertCircle size="1rem" />} title="Error" color="red">
-        Failed to load habit data: {(logsError as Error).message}
+        Failed to load habit data: {(statsError as Error).message}
       </Alert>
     );
   }
 
   // Handle no data
-  if (!logs || logs.length === 0 || chartData.length === 0) {
+  if (!statsData || !habit || chartData.length === 0) {
     return (
       <Stack gap="md" align="center">
         <Title order={4}>{title}</Title>
@@ -151,11 +142,11 @@ export function DailyUsagePieChart({
       <Group gap="lg" justify="center">
         <Text size="sm" c="dimmed">
           <Text span fw={500} c="dark">
-            Total: {totalUsage.toFixed(1)} {habit?.units || ""}
+            Total: {totalUsage.toFixed(1)} {habit.units || ""}
           </Text>
         </Text>
         <Text size="sm" c="dimmed">
-          Last {chartData.length} {chartData.length === 1 ? "day" : "days"}
+          Today's Progress
         </Text>
       </Group>
     </Stack>

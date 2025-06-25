@@ -30,9 +30,17 @@ export interface PaginatedHabitLogs {
   };
 }
 
+export enum HabitLogBreakdown {
+  Hour = "hour",
+  HourlyDetail = "hourly_detail",
+  Day = "day",
+  Week = "week",
+  Month = "month",
+}
+
 export interface HabitLogStats {
   habitId: string;
-  breakdown: "hour" | "hourly_detail" | "day" | "week" | "month" | "year";
+  breakdown: HabitLogBreakdown;
   timeRange: {
     startDate: string;
     endDate: string;
@@ -65,7 +73,7 @@ export interface FetchHabitLogsParams {
 
 export interface FetchHabitLogStatsParams {
   habitId: string;
-  breakdown?: "hour" | "hourly_detail" | "day" | "week" | "month" | "year";
+  breakdown?: HabitLogBreakdown;
   startDate?: string;
   endDate?: string;
 }
@@ -123,7 +131,7 @@ const fetchHabitLogs = async ({
 
 const fetchHabitLogStats = async ({
   habitId,
-  breakdown = "day",
+  breakdown = HabitLogBreakdown.Day,
   startDate,
   endDate,
 }: FetchHabitLogStatsParams): Promise<HabitLogStats> => {
@@ -257,12 +265,16 @@ export const useInfiniteHabitLogs = (
 export const useHabitLogStats = (
   habitId: string,
   options?: {
-    breakdown?: "hour" | "hourly_detail" | "day" | "week" | "month" | "year";
+    breakdown?: HabitLogBreakdown;
     startDate?: string;
     endDate?: string;
   }
 ) => {
-  const { breakdown = "day", startDate, endDate } = options || {};
+  const {
+    breakdown = HabitLogBreakdown.Day,
+    startDate,
+    endDate,
+  } = options || {};
 
   return useQuery({
     queryKey: habitLogQueryKeys.statsByBreakdown(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useHabitLogStats } from "@/lib/api/habit-logs";
+import { HabitLogBreakdown, useHabitLogStats } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
 import { PieChart } from "@mantine/charts";
 import {
@@ -45,7 +45,7 @@ export function DailyUsagePieChart({
     isLoading: statsLoading,
     error: statsError,
   } = useHabitLogStats(habitId, {
-    breakdown: "day",
+    breakdown: HabitLogBreakdown.Day,
     startDate: dateRange.startDate,
     endDate: dateRange.endDate,
   });
@@ -146,7 +146,7 @@ export function DailyUsagePieChart({
           </Text>
         </Text>
         <Text size="sm" c="dimmed">
-          Today's Progress
+          Today&apos;s Progress
         </Text>
       </Group>
     </Stack>

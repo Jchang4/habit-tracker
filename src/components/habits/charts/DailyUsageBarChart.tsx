@@ -1,6 +1,6 @@
 "use client";
 
-import { useHabitLogStats } from "@/lib/api/habit-logs";
+import { HabitLogBreakdown, useHabitLogStats } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
 import { BarChart } from "@mantine/charts";
 import { SegmentedControl, Skeleton } from "@mantine/core";
@@ -36,7 +36,7 @@ export function DailyUsageBarChart({ habitId }: DailyUsageBarChartProps) {
   const { data: statsData, isLoading: isStatsLoading } = useHabitLogStats(
     habitId,
     {
-      breakdown: "day",
+      breakdown: HabitLogBreakdown.Day,
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
     }

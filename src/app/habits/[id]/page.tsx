@@ -79,20 +79,22 @@ export default function HabitPage({ params }: HabitPageProps) {
   return (
     <Stack gap="lg" p="md" pb="8rem">
       {/* Header */}
-      <Group justify="space-between" align="center">
+      <Stack>
         <Box w="100%">
-          <Title order={1}>{habit.name}</Title>
+          <Group gap="md" align="center">
+            <Title order={1}>{habit.name}</Title>
+            <GoodHabitBadge goodHabit={habit.goodHabit} />
+          </Group>
           {habit.description && (
             <Text size="lg" c="dimmed" mt="xs">
               {habit.description}
             </Text>
           )}
         </Box>
-        <Group>
+        <Box>
           <EditHabitModal habit={habit} />
-          <GoodHabitBadge goodHabit={habit.goodHabit} />
-        </Group>
-      </Group>
+        </Box>
+      </Stack>
 
       {/* Main Content Grid */}
       <Grid>

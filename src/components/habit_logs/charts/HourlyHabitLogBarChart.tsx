@@ -2,7 +2,7 @@
 
 import { HabitLogBreakdown } from "@/lib/api/habit-logs";
 import { useHabit } from "@/lib/api/habits";
-import { SegmentedControl, Skeleton, Stack, Text, Title } from "@mantine/core";
+import { SegmentedControl, Skeleton, Stack, Title } from "@mantine/core";
 import { endOfDay, startOfDay } from "date-fns";
 import { useMemo, useState } from "react";
 import HabitLogsBarChart from "./HabitLogsBarChart";
@@ -97,12 +97,9 @@ export default function HourlyHabitLogBarChart({
           { value: "yesterday", label: "Yesterday" },
           { value: "week", label: "Last 7 Days" },
         ]}
-        mb="md"
+        mb="xl"
         fullWidth
       />
-      <Text size="sm" c="dimmed" ta="center">
-        All times shown in your local timezone
-      </Text>
       <HabitLogsBarChart
         habitId={habitId}
         breakdown={HabitLogBreakdown.Hour}

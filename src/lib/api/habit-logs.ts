@@ -36,6 +36,7 @@ export enum HabitLogBreakdown {
   Day = "day",
   Week = "week",
   Month = "month",
+  Year = "year",
 }
 
 export interface HabitLogStats {

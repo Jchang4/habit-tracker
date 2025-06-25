@@ -1,10 +1,11 @@
 "use client";
 
 import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
+import DailyHabitLogsBarChart from "@/components/habit_logs/charts/DailyHabitLogsBarChart";
+import HourlyHabitLogBarChart from "@/components/habit_logs/charts/HourlyHabitLogBarChart";
 import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
 import { GoodHabitBadge } from "@/components/habits/GoodHabitBadge";
 import { HabitDetailsCard } from "@/components/habits/HabitDetailsCard";
-import { DailyUsageBarChart } from "@/components/habits/charts/DailyUsageBarChart";
 import { DailyUsagePieChart } from "@/components/habits/charts/DailyUsagePieChart";
 import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
 import { DeleteHabitModal } from "@/components/habits/modals/DeleteHabitModal";
@@ -113,6 +114,10 @@ export default function HabitPage({ params }: HabitPageProps) {
               </Grid.Col>
             </Grid>
 
+            <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+              <HourlyHabitLogBarChart habitId={habit.id} />
+            </Card>
+
             {/* Usage Per Day Chart */}
             <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
               <Group mb="md">
@@ -121,7 +126,7 @@ export default function HabitPage({ params }: HabitPageProps) {
                   Usage Per Day
                 </Text>
               </Group>
-              <DailyUsageBarChart habitId={habit.id} />
+              <DailyHabitLogsBarChart habitId={habit.id} />
             </Card>
           </Stack>
         </Grid.Col>

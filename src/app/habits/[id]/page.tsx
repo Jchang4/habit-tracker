@@ -12,6 +12,7 @@ import { EditHabitModal } from "@/components/habits/modals/EditHabitModal";
 import { useHabit } from "@/lib/api/habits";
 import {
   Alert,
+  Box,
   Card,
   Container,
   Grid,
@@ -78,14 +79,14 @@ export default function HabitPage({ params }: HabitPageProps) {
     <Stack gap="lg" p="md" pb="8rem">
       {/* Header */}
       <Group justify="space-between" align="center">
-        <div>
+        <Box w="100%">
           <Title order={1}>{habit.name}</Title>
           {habit.description && (
             <Text size="lg" c="dimmed" mt="xs">
               {habit.description}
             </Text>
           )}
-        </div>
+        </Box>
         <Group>
           <EditHabitModal habit={habit} />
           <GoodHabitBadge goodHabit={habit.goodHabit} />
@@ -157,7 +158,7 @@ const TodaysProgressCard = ({ habitId }: { habitId: string }) => {
       <Group mb="md">
         <IconChartPie size="1.5rem" />
         <Text fw={500} size="lg">
-          Today's Progress
+          Today&apos;s Progress
         </Text>
       </Group>
       <Paper

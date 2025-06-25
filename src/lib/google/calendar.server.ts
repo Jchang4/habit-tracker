@@ -157,6 +157,7 @@ export async function checkGoogleConnection(userId: string): Promise<boolean> {
     });
     return !!googleToken;
   } catch (error) {
+    console.error("Failed to check Google connection:", error);
     return false;
   }
 }

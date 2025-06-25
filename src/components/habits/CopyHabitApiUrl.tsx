@@ -45,8 +45,8 @@ export function CopyHabitApiUrl({ habit }: CopyHabitApiUrlProps) {
         </Group>
 
         <Text size="sm">
-          Use this endpoint to log your habit via API. You'll need an API key to
-          authenticate.
+          Use this endpoint to log your habit via API. You&apos;ll need an API
+          key to authenticate.
         </Text>
 
         <Box>
@@ -116,7 +116,7 @@ export function CopyHabitApiUrl({ habit }: CopyHabitApiUrlProps) {
             <br />
             2. Create a new API key with a name and optional description
             <br />
-            3. Copy the generated key immediately (it won't be shown again)
+            3. Copy the generated key immediately (it won&apos;t be shown again)
             <br />
             4. Use this key in the x-amor-api-key header for all API requests
           </Text>

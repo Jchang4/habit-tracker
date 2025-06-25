@@ -57,8 +57,8 @@ export function ApiKeyDocumentation() {
           <List.Item>
             <Text fw={500}>Create a key</Text>
             <Text size="sm">
-              Click "Create API Key" and give it a descriptive name and optional
-              description.
+              Click &quot;Create API Key&quot; and give it a descriptive name
+              and optional description.
             </Text>
           </List.Item>
 

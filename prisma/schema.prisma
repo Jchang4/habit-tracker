@@ -24,6 +24,7 @@ model Habit {
   units        String? // "reps", "minutes", "ml", etc.
   defaultAmount Float   @default(1) // Default amount when none is provided
   goodHabit    Boolean  @default(true) // true = build, false = reduce
+  favorite     Boolean  @default(false) // true = favorite (starred)
   targetPerDay Float? // e.g. 8 glasses
   aiNotes      Json? // future AI embeddings / metadata
   createdAt    DateTime @default(now())

@@ -9,6 +9,7 @@ export interface Habit {
   units: string;
   defaultAmount: number;
   goodHabit: boolean;
+  favorite: boolean;
   targetPerDay: number;
   createdAt: string;
   updatedAt: string;
@@ -20,6 +21,7 @@ export interface CreateHabitData {
   units: string;
   defaultAmount: number;
   goodHabit: boolean;
+  favorite?: boolean;
   targetPerDay: number;
 }
 
@@ -29,6 +31,7 @@ export interface UpdateHabitData {
   units?: string;
   defaultAmount?: number;
   goodHabit?: boolean;
+  favorite?: boolean;
   targetPerDay?: number;
 }
 

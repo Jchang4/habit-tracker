@@ -34,7 +34,13 @@ export function HabitList({ cardProps }: HabitListProps = {}) {
   return (
     <>
       {habits
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort((a, b) => {
+          // Sort by favorite status first (favorites come first)
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+          // Then sort by name
+          return a.name.localeCompare(b.name);
+        })
         .map((habit) => (
           <HabitCard key={habit.id} habit={habit} cardProps={cardProps} />
         ))}

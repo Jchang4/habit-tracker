@@ -17,6 +17,7 @@ import {
   Textarea,
   Title,
 } from "@mantine/core";
+import { IconStar } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 interface HabitFormProps {
@@ -37,6 +38,7 @@ export function HabitForm({ mode, initialData, onSuccess }: HabitFormProps) {
     units: "",
     defaultAmount: 1,
     goodHabit: true,
+    favorite: false,
     targetPerDay: 1,
   });
 
@@ -49,6 +51,7 @@ export function HabitForm({ mode, initialData, onSuccess }: HabitFormProps) {
         units: initialData.units,
         defaultAmount: initialData.defaultAmount,
         goodHabit: initialData.goodHabit,
+        favorite: initialData.favorite,
         targetPerDay: initialData.targetPerDay,
       });
     }
@@ -66,9 +69,10 @@ export function HabitForm({ mode, initialData, onSuccess }: HabitFormProps) {
       setFormData((prev) => ({ ...prev, [field]: Number(value) || 0 }));
     };
 
-  const handleSwitchChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, goodHabit: checked }));
-  };
+  const handleSwitchChange =
+    (field: "goodHabit" | "favorite") => (checked: boolean) => {
+      setFormData((prev) => ({ ...prev, [field]: checked }));
+    };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +87,7 @@ export function HabitForm({ mode, initialData, onSuccess }: HabitFormProps) {
             units: "",
             defaultAmount: 1,
             goodHabit: true,
+            favorite: false,
             targetPerDay: 1,
           });
 
@@ -158,11 +163,27 @@ export function HabitForm({ mode, initialData, onSuccess }: HabitFormProps) {
           placeholder="Daily goal"
         />
 
-        <Switch
-          label="This is a good habit I want to build"
-          checked={formData.goodHabit}
-          onChange={(event) => handleSwitchChange(event.currentTarget.checked)}
-        />
+        <Group grow>
+          <Switch
+            label="This is a good habit I want to build"
+            checked={formData.goodHabit}
+            onChange={(event) =>
+              handleSwitchChange("goodHabit")(event.currentTarget.checked)
+            }
+          />
+
+          <Switch
+            label="Mark as favorite"
+            checked={formData.favorite}
+            onChange={(event) =>
+              handleSwitchChange("favorite")(event.currentTarget.checked)
+            }
+            thumbIcon={
+              formData.favorite ? <IconStar size={12} stroke={2.5} /> : null
+            }
+            color="yellow"
+          />
+        </Group>
 
         <Button type="submit" loading={isPending}>
           {mode === "create" ? "Create Habit" : "Update Habit"}

@@ -4,8 +4,9 @@ import { HabitLogsTable } from "@/components/habit_logs/HabitLogsTable";
 import { CopyHabitApiUrl } from "@/components/habits/CopyHabitApiUrl";
 import { DailyUsageSparkline } from "@/components/habits/charts/DailyUsageSparkline";
 import { HabitQuickLogInput } from "@/components/habits/forms/HabitQuickLogInput";
-import { Habit } from "@/lib/api/habits";
+import { Habit, useUpdateHabit } from "@/lib/api/habits";
 import {
+  ActionIcon,
   Box,
   Button,
   Card,
@@ -15,8 +16,14 @@ import {
   Group,
   Text,
   Title,
+  Tooltip,
 } from "@mantine/core";
-import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconStar,
+  IconStarFilled,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { useState } from "react";
 import { GoodHabitBadge } from "./GoodHabitBadge";
@@ -28,16 +35,43 @@ interface HabitCardProps {
 
 export function HabitCard({ habit, cardProps }: HabitCardProps) {
   const [showLogs, setShowLogs] = useState(false);
+  const { mutate: updateHabit } = useUpdateHabit();
+
+  const toggleFavorite = () => {
+    updateHabit({
+      id: habit.id,
+      data: { favorite: !habit.favorite },
+    });
+  };
 
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder {...cardProps}>
       <Group justify="space-between" mb="xs">
-        <Link
-          href={`/habits/${habit.id}`}
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <Title order={4}>{habit.name}</Title>
-        </Link>
+        <Group>
+          <Link
+            href={`/habits/${habit.id}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <Title order={4}>{habit.name}</Title>
+          </Link>
+          <Tooltip
+            label={
+              habit.favorite ? "Remove from favorites" : "Add to favorites"
+            }
+          >
+            <ActionIcon
+              color={habit.favorite ? "yellow" : "gray"}
+              onClick={toggleFavorite}
+              variant={habit.favorite ? "filled" : "subtle"}
+            >
+              {habit.favorite ? (
+                <IconStarFilled size="1.2rem" />
+              ) : (
+                <IconStar size="1.2rem" />
+              )}
+            </ActionIcon>
+          </Tooltip>
+        </Group>
         {habit.targetPerDay && (
           <Text size="sm" c="dimmed">
             Target: {habit.targetPerDay} {habit.units}

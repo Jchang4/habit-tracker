@@ -53,9 +53,9 @@ async function processBatches<T>(
   let processed = 0;
   for (const batch of batches) {
     await processor(batch);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     processed += batch.length;
     process.stdout.write(`\rProcessed ${processed}/${items.length} items...`);
+    await new Promise((resolve) => setTimeout(resolve, 30000));
   }
   process.stdout.write("\n");
 }

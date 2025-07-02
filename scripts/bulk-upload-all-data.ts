@@ -4,7 +4,7 @@ import path from "path";
 import { prisma } from "../src/lib/prisma";
 
 // Configuration
-const BATCH_SIZE = 1000; // Process records in batches of 1000 for inserts
+const BATCH_SIZE = 100; // Process records in batches of 1000 for inserts
 
 // Type for JSON parsed data (with potential nested relations)
 interface HabitWithLogs {
@@ -55,7 +55,7 @@ async function processBatches<T>(
     await processor(batch);
     processed += batch.length;
     process.stdout.write(`\rProcessed ${processed}/${items.length} items...`);
-    await new Promise((resolve) => setTimeout(resolve, 30000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
   process.stdout.write("\n");
 }

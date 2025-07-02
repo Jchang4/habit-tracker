@@ -1,10 +1,14 @@
 "use client";
 
 import { useHabits } from "@/lib/api/habits";
-import { Skeleton, Stack, Text } from "@mantine/core";
+import { CardProps, Skeleton, Stack, Text } from "@mantine/core";
 import { HabitCard } from "./HabitCard";
 
-export function HabitList() {
+interface HabitListProps {
+  cardProps?: CardProps;
+}
+
+export function HabitList({ cardProps }: HabitListProps = {}) {
   const { data: habits, isLoading, error } = useHabits();
 
   if (isLoading) {
@@ -29,9 +33,11 @@ export function HabitList() {
 
   return (
     <>
-      {habits.map((habit) => (
-        <HabitCard key={habit.id} habit={habit} />
-      ))}
+      {habits
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((habit) => (
+          <HabitCard key={habit.id} habit={habit} cardProps={cardProps} />
+        ))}
     </>
   );
 }

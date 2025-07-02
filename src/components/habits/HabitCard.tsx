@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Card,
+  CardProps,
   Collapse,
   Divider,
   Group,
@@ -22,71 +23,70 @@ import { GoodHabitBadge } from "./GoodHabitBadge";
 
 interface HabitCardProps {
   habit: Habit;
+  cardProps?: CardProps;
 }
 
-export function HabitCard({ habit }: HabitCardProps) {
+export function HabitCard({ habit, cardProps }: HabitCardProps) {
   const [showLogs, setShowLogs] = useState(false);
 
   return (
-    <Box style={{ width: "100%" }}>
-      <Card shadow="sm" padding="md" radius="md" withBorder>
-        <Group justify="space-between" mb="xs">
-          <Link
-            href={`/habits/${habit.id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <Title order={4}>{habit.name}</Title>
-          </Link>
-          {habit.targetPerDay && (
-            <Text size="sm" c="dimmed">
-              Target: {habit.targetPerDay} {habit.units}
-            </Text>
-          )}
-        </Group>
-
-        {habit.description && (
-          <Text size="sm" c="dimmed" mb="xs">
-            {habit.description}
+    <Card shadow="sm" padding="md" radius="md" withBorder {...cardProps}>
+      <Group justify="space-between" mb="xs">
+        <Link
+          href={`/habits/${habit.id}`}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <Title order={4}>{habit.name}</Title>
+        </Link>
+        {habit.targetPerDay && (
+          <Text size="sm" c="dimmed">
+            Target: {habit.targetPerDay} {habit.units}
           </Text>
         )}
+      </Group>
 
-        {/* Trend Sparkline */}
-        <Box my="md" w="100%">
-          <DailyUsageSparkline habitId={habit.id} days={7} />
-        </Box>
+      {habit.description && (
+        <Text size="sm" c="dimmed" mb="xs">
+          {habit.description}
+        </Text>
+      )}
 
-        <Divider my="sm" />
+      {/* Trend Sparkline */}
+      <Box my="md" w="100%">
+        <DailyUsageSparkline habitId={habit.id} days={7} />
+      </Box>
 
-        <HabitQuickLogInput habit={habit} />
+      <Divider my="sm" />
 
-        <Divider my="sm" />
+      <HabitQuickLogInput habit={habit} />
 
-        <Group justify="space-between" mt="md">
-          <GoodHabitBadge goodHabit={habit.goodHabit} />
+      <Divider my="sm" />
 
-          <Button
-            variant="light"
-            size="xs"
-            onClick={() => setShowLogs(!showLogs)}
-            rightSection={
-              showLogs ? (
-                <IconChevronUp size="1rem" />
-              ) : (
-                <IconChevronDown size="1rem" />
-              )
-            }
-          >
-            {showLogs ? "Hide Logs" : "Show Logs"}
-          </Button>
-        </Group>
+      <Group justify="space-between" mt="md">
+        <GoodHabitBadge goodHabit={habit.goodHabit} />
 
-        <Collapse in={showLogs}>
-          <Divider my="md" />
-          <HabitLogsTable habitId={habit.id} />
-          <Divider my="md" />
-          <CopyHabitApiUrl habit={habit} />
-        </Collapse>
-      </Card>
-    </Box>
+        <Button
+          variant="light"
+          size="xs"
+          onClick={() => setShowLogs(!showLogs)}
+          rightSection={
+            showLogs ? (
+              <IconChevronUp size="1rem" />
+            ) : (
+              <IconChevronDown size="1rem" />
+            )
+          }
+        >
+          {showLogs ? "Hide Logs" : "Show Logs"}
+        </Button>
+      </Group>
+
+      <Collapse in={showLogs}>
+        <Divider my="md" />
+        <HabitLogsTable habitId={habit.id} />
+        <Divider my="md" />
+        <CopyHabitApiUrl habit={habit} />
+      </Collapse>
+    </Card>
   );
 }
